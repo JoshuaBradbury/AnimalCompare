@@ -22,17 +22,17 @@ Therefore I think it is best to leave this method of comparison as a future feat
 # Designing the choose screen
 The way the user can choose which animal in the comparison is not an easy task from a UX stand point. It needs to be accessible, with big buttons or actions to choose with, but also be fun and engaging for everyone. It also needs to display clean pictures of the animals to compare, otherwise it will make it harder to discern clear details, simplifying the choice, leading to the user going through photos quicker or being less interested. Below are a few potential designs, annotated with pros and cons where relevant.
 
-![](images\comparisonSide.png)  
-![](images\comparisonLong.png)  
-![](images\comparisonSwipe.png)  
-![](images\comparisonSwap.png)
+![](images/comparisonSide.png)  
+![](images/comparisonLong.png)  
+![](images/comparisonSwipe.png)  
+![](images/comparisonSwap.png)
 
 Out of all of the above I prefer the swipe layout. This can work quite well in a format where the arrows are only visible for a few swipes when the user first launches the app, and then fade away as the user gets a hang of the app. I think if it is combined with the ability to tap a side of the screen to vote as well for accessibility, with a tutorial on first launch showing that you can, it will help the app remain clean looking while achieving the same functionality. However certain tasks should be prioritised for the initial release, with clearer tutorials being treated as a future feature, unless sufficient time is available.
 
 # Desinging the swipe review screen
 There are two ways of desinging this screen, we can have all swipes bundled into one list, mixing the animal types, or we can separate them out into their own lists and use something like tabs at the top, as the top won't hold any necessary info. The downside to tabs is they can again clutter the view a little, but it provides a clear separation between the animal types, allowing the user to find the exact swipe they want to view/review. However the user going to review swipes would most likely be in the case of a wrong swipe, at which point having a mixed list wouldn't matter as it would be at or near the top. I think I personally lean towards the tabs in this instance, that way it still provides a clean avenue if they even just want to look at the photos they saw. Also this would be a great opportunity to make them expandable when tapped on, indicated with a drop down button on the right, where it shows a bigger version of the picture, but has a delete button at the bottom. This real estate can also be split with a favourite button perhaps, allowing users to favourite some of the pictures they saw, although as the apps main purpose is about "finding a favourite" through comparisons, this can be left to the overall swipes screen.
 
-![](images\swipeList.png)
+![](images/swipeList.png)
 
 # Desinging the overall votes screen
 This screen is similar to the swipe review screen, however it is purely read only. It will show their top ten photos based on votes/how recently they were swiped, and show them in full resolution. They will also be listed with the number of votes they have received so far. It will have all the animals mixed into one, however it might be worth using the tabs design from the swipe review screen as well to give a separated list, and maybe have an all tab at the start, although this might be worthwhile for that screen too. This is something that would be good to A/B test at some point, but I will try both and see what I prefer at the time. A user should be able to tap on a photo to view it like in a photo gallery app, with zoom and pan capabilities. An optional feature would let them keep scrolling, but this is undetermined as of now, and is most likely going to be left as a future feature.
