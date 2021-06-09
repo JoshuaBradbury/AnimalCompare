@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="screen_dog">Dogs</string>
+    <string name="screen_review">Swipes</string>
+    <string name="screen_top_animals">Favourites</string>
+</resources>
