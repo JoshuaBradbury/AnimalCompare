@@ -1,0 +1,25 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+
+    // Okio
+    implementation("com.squareup.okio:okio:$okio")
+
+    // Coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines"
+
+    // Compose
+    implementation "androidx.compose.runtime:runtime:$compose"
+
+    // Hilt
+    implementation "com.google.dagger:hilt-android:$dagger"
+    kapt "com.google.dagger:hilt-compiler:$dagger"
+
+    testImplementation "junit:junit:$junit"
+    androidTestImplementation "androidx.test.ext:junit:$junitExt"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoCore"
+}

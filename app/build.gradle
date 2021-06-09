@@ -1,0 +1,67 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
+}
+
+android {
+    defaultConfig {
+        applicationId "uk.co.newagedev.animalcompare"
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            debuggable false
+            applicationIdSuffix ""
+            versionNameSuffix ""
+        }
+    }
+
+    configurations {
+        all {
+            exclude group: 'org.json', module: 'json'
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    // Internal modules
+    implementation project(':internal:common')
+    implementation project(':internal:domain')
+    implementation project(':internal:ui')
+    implementation project(':internal:data')
+
+    // Coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines"
+
+    // Compose
+    implementation "androidx.compose.runtime:runtime:$compose"
+
+// Hilt
+    implementation "com.google.dagger:hilt-android:$dagger"
+    kapt "com.google.dagger:hilt-compiler:$dagger"
+
+    kapt "androidx.hilt:hilt-compiler:$hiltVersion"
+
+
+}

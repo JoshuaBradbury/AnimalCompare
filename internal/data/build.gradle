@@ -1,0 +1,27 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+
+dependencies {
+    implementation project(':internal:common')
+    implementation project(':internal:domain')
+
+    // Coroutines
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines"
+
+    // OkHttp / okio
+    implementation("com.squareup.okhttp3:okhttp:$okhttp")
+    implementation("com.squareup.okio:okio:$okio")
+
+    // Hilt
+    implementation "com.google.dagger:hilt-android:$dagger"
+    kapt "com.google.dagger:hilt-compiler:$dagger"
+
+    // Compose
+    implementation "androidx.compose.runtime:runtime:$compose"
+
+    testImplementation "junit:junit:$junit"
+    androidTestImplementation "androidx.test.ext:junit:$junitExt"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoCore"
+}

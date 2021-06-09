@@ -1,0 +1,6 @@
+rootProject.name = "AnimalCompare"
+include ':app'
+include ':internal:common'
+include ':internal:data'
+include ':internal:domain'
+include ':internal:ui'

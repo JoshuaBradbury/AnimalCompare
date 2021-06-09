@@ -1,0 +1,13 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+
+dependencies {
+    // Compose
+    implementation "androidx.compose.runtime:runtime:$compose"
+
+    testImplementation "junit:junit:$junit"
+    testImplementation "org.amshove.kluent:kluent-android:$kluent"
+    androidTestImplementation "androidx.test.ext:junit:$junitExt"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoCore"
+}
