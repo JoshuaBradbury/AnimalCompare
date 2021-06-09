@@ -12,49 +12,25 @@ buildscript {
         activity = '1.2.2'
         fragment = '1.3.4'
         materialComponents = '1.3.0'
-        recyclerView = '1.1.0'
-        constraintLayout = '2.0.4'
         lifecycle = '2.3.1'
-        browser = '1.3.0'
         testRunner = '1.3.0'
-        multidex = '2.0.1'
-        swipeRefresh = '1.1.0'
-        viewPager = '1.0.0'
 
         // Android Architecture Components
         compose = '1.0.0-beta08'
         navigation = '2.3.5'
 
-        // Google play
-        playServicesBase = '17.6.0'
-        playServicesLocation = '18.0.0'
-
-        // coroutines
+        // KotlinX
         coroutines = '1.4.3'
+        serialization = '1.1.0'
 
-        // others
-        parse = '1.25.0'
-        parseLiveQuery = '1.2.2'
+        // Dependency Injection
         dagger = '2.36'
         hiltVersion = '1.0.0'
-        rxjava = '3.0.11'
-        rxandroid = '3.0.0'
-        glide = '4.12.0'
-        moshi = '1.12.0'
-        timber = '4.7.1'
-        libphonenumber = '8.12.6'
-        appsFlyer = '6.2.0'
-        installreferrer = '2.2'
+
+        // Square
         okhttp = '4.9.1'
         okio = '2.10.0'
-        facebook = '7.1.0'
-        exoPlayer = '2.13.3'
-        imageCropper = '2.1.0'
-        matisse = '0.5.3-beta3'
-        lightCompressor = '0.7.8'
-
-        // Firebase
-        bom = '26.8.0'
+        retrofit = '2.9.0'
 
         // testing
         junit = '4.13.2'
@@ -72,8 +48,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.0-beta03'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+
         classpath "com.google.dagger:hilt-android-gradle-plugin:$dagger"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
     }
@@ -122,7 +97,7 @@ subprojects {
                 }
 
                 composeOptions {
-                    kotlinCompilerExtensionVersion '1.0.0-beta08'
+                    kotlinCompilerExtensionVersion compose
                 }
 
                 testOptions {

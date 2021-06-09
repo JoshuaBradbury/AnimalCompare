@@ -10,9 +10,13 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines"
 
-    // OkHttp / okio
+    // KotlinX Serialization
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization"
+
+    // Square libraries
     implementation("com.squareup.okhttp3:okhttp:$okhttp")
     implementation("com.squareup.okio:okio:$okio")
+    implementation("com.squareup.retrofit2:retrofit:$retrofit")
 
     // Hilt
     implementation "com.google.dagger:hilt-android:$dagger"
