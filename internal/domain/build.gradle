@@ -5,6 +5,7 @@ apply plugin: 'kotlin-kapt'
 dependencies {
     // Compose
     implementation "androidx.compose.runtime:runtime:$compose"
+    implementation "androidx.annotation:annotation:$annotation"
 
     testImplementation "junit:junit:$junit"
     testImplementation "org.amshove.kluent:kluent-android:$kluent"
