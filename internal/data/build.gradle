@@ -14,13 +14,20 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization"
 
     // Square libraries
-    implementation("com.squareup.okhttp3:okhttp:$okhttp")
-    implementation("com.squareup.okio:okio:$okio")
-    implementation("com.squareup.retrofit2:retrofit:$retrofit")
+    implementation "com.squareup.okhttp3:okhttp:$okhttp"
+    implementation "com.squareup.okio:okio:$okio"
+    implementation "com.squareup.retrofit2:retrofit:$retrofit"
 
     // Hilt
     implementation "com.google.dagger:hilt-android:$dagger"
     kapt "com.google.dagger:hilt-compiler:$dagger"
+
+    // Room
+    implementation "androidx.room:room-runtime:$room"
+    implementation "androidx.room:room-ktx:$room"
+    kapt "androidx.room:room-compiler:$room"
+
+    testImplementation "androidx.room:room-testing:$room"
 
     // Compose
     implementation "androidx.compose.runtime:runtime:$compose"

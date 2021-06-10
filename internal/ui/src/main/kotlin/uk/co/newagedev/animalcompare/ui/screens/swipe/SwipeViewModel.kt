@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.map
 import uk.co.newagedev.animalcompare.data.AnimalRepository
 import uk.co.newagedev.animalcompare.domain.model.Animal
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
+import uk.co.newagedev.animalcompare.domain.model.Comparison
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -21,18 +22,13 @@ class SwipeViewModel @Inject constructor(
         return animalRepository
             .getAnimalFlow(animalType)
             .map {
-                if (it == null) {
-                    ComparisonState.Loading
-                } else {
-                    ComparisonState.Success(it.first, it.second)
-                }
+                ComparisonState.Success(it.first, it.second) as ComparisonState
             }.catch {
                 emit(ComparisonState.Error(it))
             }
     }
 
     suspend fun submitSwipe(winner: Animal, loser: Animal) {
-        animalRepository.submitWinner(winner)
-        animalRepository.submitLoser(loser)
+        animalRepository.submitComparison(Comparison(-1, winner.id, loser.id))
     }
 }

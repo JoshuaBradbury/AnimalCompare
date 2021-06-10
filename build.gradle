@@ -20,6 +20,7 @@ buildscript {
         compose = '1.0.0-beta08'
         navigation = '2.3.5'
         hiltNavigationCompose = '1.0.0-alpha02'
+        room = '2.3.0'
 
         // KotlinX
         coroutines = '1.4.3'
