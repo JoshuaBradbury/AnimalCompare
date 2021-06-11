@@ -29,6 +29,6 @@ class SwipeViewModel @Inject constructor(
     }
 
     suspend fun submitSwipe(winner: Animal, loser: Animal) {
-        animalRepository.submitComparison(Comparison(-1, winner.id, loser.id))
+        animalRepository.submitComparison(Comparison(0, winner.id, loser.id))
     }
 }
