@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'kotlinx-serialization'
 }
 
 android {
@@ -57,11 +58,15 @@ dependencies {
     // Compose
     implementation "androidx.compose.runtime:runtime:$compose"
 
-// Hilt
+    // Hilt
     implementation "com.google.dagger:hilt-android:$dagger"
     kapt "com.google.dagger:hilt-compiler:$dagger"
 
     kapt "androidx.hilt:hilt-compiler:$hiltVersion"
 
+    // Room
+    implementation "androidx.room:room-runtime:$room"
 
+    // Coil
+    implementation "io.coil-kt:coil:$coil"
 }

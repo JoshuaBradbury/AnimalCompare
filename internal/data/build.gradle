@@ -1,6 +1,9 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'kotlinx-serialization'
+}
 
 dependencies {
     implementation project(':internal:common')
@@ -14,16 +17,27 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization"
 
     // Square libraries
-    implementation("com.squareup.okhttp3:okhttp:$okhttp")
-    implementation("com.squareup.okio:okio:$okio")
-    implementation("com.squareup.retrofit2:retrofit:$retrofit")
+    implementation "com.squareup.okhttp3:okhttp:$okhttp"
+    implementation "com.squareup.okio:okio:$okio"
+    implementation "com.squareup.retrofit2:retrofit:$retrofit"
+    implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:$retrofitSerialization"
 
     // Hilt
     implementation "com.google.dagger:hilt-android:$dagger"
     kapt "com.google.dagger:hilt-compiler:$dagger"
 
+    // Room
+    implementation "androidx.room:room-runtime:$room"
+    implementation "androidx.room:room-ktx:$room"
+    kapt "androidx.room:room-compiler:$room"
+
+    testImplementation "androidx.room:room-testing:$room"
+
     // Compose
     implementation "androidx.compose.runtime:runtime:$compose"
+
+    // Coil
+    implementation "io.coil-kt:coil:$coil"
 
     testImplementation "junit:junit:$junit"
     androidTestImplementation "androidx.test.ext:junit:$junitExt"
