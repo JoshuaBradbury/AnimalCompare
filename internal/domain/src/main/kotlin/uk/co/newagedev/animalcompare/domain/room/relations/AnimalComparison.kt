@@ -6,7 +6,8 @@ import uk.co.newagedev.animalcompare.domain.model.Animal
 import uk.co.newagedev.animalcompare.domain.model.Comparison
 
 data class AnimalComparison(
-    @Embedded val comparison: Comparison,
+    @Embedded
+    val comparison: Comparison,
     @Relation(
         parentColumn = "winner",
         entityColumn = "id"

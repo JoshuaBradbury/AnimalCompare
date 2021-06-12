@@ -65,4 +65,7 @@ dependencies {
 
     // Room
     implementation "androidx.room:room-runtime:$room"
+
+    // Coil
+    implementation "io.coil-kt:coil:$coil"
 }

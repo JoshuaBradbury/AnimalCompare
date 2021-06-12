@@ -7,6 +7,6 @@ import androidx.room.PrimaryKey
 data class Comparison(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
-    val winner: String,
-    val loser: String,
+    val winner: Int,
+    val loser: Int,
 )

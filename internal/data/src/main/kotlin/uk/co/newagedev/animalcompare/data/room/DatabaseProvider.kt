@@ -18,7 +18,8 @@ class DatabaseProvider {
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(
             context,
-            AppDatabase::class.java, "animal-compare-db"
+            AppDatabase::class.java,
+            "animal-compare-db"
         ).build()
     }
 }

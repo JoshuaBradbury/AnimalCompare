@@ -7,10 +7,15 @@ object FakeAnimal {
 
     private val dogs = listOf(
         Animal(
-            "dog1",
-            "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/dog-puppy-on-garden-royalty-free-image-1586966191.jpg?crop=1.00xw:0.669xh;0,0.190xh&resize=1200:*"
+            1,
+            "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/dog-puppy-on-garden-royalty-free-image-1586966191.jpg",
+            AnimalType.Dog,
         ),
-        Animal("dog2", "https://www.rd.com/wp-content/uploads/2021/01/GettyImages-588935825.jpg"),
+        Animal(
+            2,
+            "https://www.rd.com/wp-content/uploads/2021/01/GettyImages-588935825.jpg",
+            AnimalType.Dog,
+        ),
     )
 
     fun getFakeAnimal(animalType: AnimalType): Animal {

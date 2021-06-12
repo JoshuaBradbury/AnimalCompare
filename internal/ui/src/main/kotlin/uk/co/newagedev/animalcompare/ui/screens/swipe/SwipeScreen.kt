@@ -1,6 +1,7 @@
 package uk.co.newagedev.animalcompare.ui.screens.swipe
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.calculateTargetValue
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.splineBasedDecay
@@ -9,13 +10,9 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.horizontalDrag
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -23,107 +20,244 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.request.ImageRequest
+import coil.size.Precision
+import com.google.accompanist.coil.LocalImageLoader
 import com.google.accompanist.coil.rememberCoilPainter
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import uk.co.newagedev.animalcompare.domain.fake.FakeAnimal
+import uk.co.newagedev.animalcompare.common.ImageSize
 import uk.co.newagedev.animalcompare.domain.model.Animal
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
 import uk.co.newagedev.animalcompare.ui.R
-import uk.co.newagedev.animalcompare.ui.theme.AnimalCompareTheme
 import kotlin.math.absoluteValue
 
 @Composable
-fun SwipeScreen(animalType: AnimalType, swipeViewModel: SwipeViewModel = hiltViewModel()) {
-    val animalFlow =
-        swipeViewModel.getAnimalFlow(animalType).collectAsState(initial = ComparisonState.Loading)
+fun SwipeScreen(
+    animalType: AnimalType,
+    swipeViewModel: SwipeViewModel = hiltViewModel()
+) {
+    // The Flow that holds the state of the current comparison to display
+    val animalFlow = swipeViewModel
+        .getAnimalFlow(animalType)
+        .collectAsState(initial = ComparisonState.Loading)
 
-    val composableScope = rememberCoroutineScope()
+    // The progress of the animation, it is hoisted here to be better shared between the
+    // SwipeController and also so that we can reset it when a new comparison has loaded
+    val offsetX = remember { Animatable(0f) }
 
-    when (animalFlow.value) {
-        is ComparisonState.Loading -> {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                CircularProgressIndicator()
-            }
-        }
-        is ComparisonState.Success -> {
-            Comparison(
-                animalType = animalType,
-                animal1 = (animalFlow.value as ComparisonState.Success).animal1,
-                animal2 = (animalFlow.value as ComparisonState.Success).animal2
-            ) { winner, loser ->
-                composableScope.launch {
-                    swipeViewModel.submitSwipe(winner, loser)
-                }
-            }
-        }
-        is ComparisonState.Error -> {
+    // Hold the state of whether a choice has been made or not, so that we can hide the swipe view
+    // and reset it off screen, removing any jumps or other visual side effects
+    val (choiceMade, updateChoiceMade) = remember { mutableStateOf<Pair<Animal, Animal>?>(null) }
 
+    // Every time the choiceMade variable updates, we should check if it has a value, without
+    // blocking the UI, and if so we should submit it and reset the swipe view
+    LaunchedEffect(choiceMade) {
+        if (choiceMade != null) {
+            swipeViewModel.submitSwipe(choiceMade.first, choiceMade.second)
+            offsetX.stop()
+            offsetX.snapTo(0f)
         }
     }
-}
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun Comparison(
-    animalType: AnimalType,
-    animal1: Animal,
-    animal2: Animal,
-    onComparisonMade: (winner: Animal, loser: Animal) -> Unit
-) {
+    // Every time we receive a new value in the flow, we should display it. A success will only be
+    // received when the comparison has already been submitted, so that it will have the correct
+    // latest value, without having to check here
+    LaunchedEffect(animalFlow.value) {
+        updateChoiceMade(null)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Title
         Text(
-            stringResource(R.string.swipe_which_animal, stringResource(animalType.animalName)),
+            stringResource(
+                R.string.swipe_which_animal,
+                stringResource(animalType.animalName)
+            ),
             style = MaterialTheme.typography.h4,
             modifier = Modifier
                 .padding(32.dp, 32.dp),
             textAlign = TextAlign.Center
         )
 
-        SwipeController { progress ->
-            if (progress == 1f) {
-                onComparisonMade(animal2, animal1)
-            } else if (progress == -1f) {
-                onComparisonMade(animal1, animal2)
-            }
+        // If a choice has been made lets just display a simple progress icon so that the user knows
+        // their choice is being submitted, with some near immediate feedback
+        if (choiceMade != null) {
+            SwipeLoading()
+        } else {
+            when (animalFlow.value) {
+                is ComparisonState.Loading -> {
+                    SwipeLoading()
+                }
+                is ComparisonState.Success -> {
+                    val (animal1, animal2) = animalFlow.value as ComparisonState.Success
 
-            Column {
-                SwipeableCard(animal = animal1, leftAligned = false, offset = -progress)
-                Spacer(modifier = Modifier.height(32.dp))
-                SwipeableCard(animal = animal2, leftAligned = true, offset = progress)
+                    SwipeController(offsetX) { progress ->
+                        // When we reach one end of the animation, be it left or right, we should
+                        // submit which animal won the comparison, as the progress maps from -1f to
+                        // 1f this is easily achieved below
+                        when (progress) {
+                            1f -> {
+                                updateChoiceMade(animal2 to animal1)
+                            }
+                            -1f -> {
+                                updateChoiceMade(animal1 to animal2)
+                            }
+                            else -> {
+                                BoxWithConstraints(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                ) {
+                                    // Limit the card height to a fixed fraction, rather than
+                                    // relying on auto constraints to make it a percentage of the
+                                    // remaining screen height, probably a better way but this works
+                                    // for now
+                                    //
+                                    // TODO: use a different dynamic layout to clean this up a bit
+                                    val cardHeight = maxHeight * 0.4f
+
+                                    Column(modifier = Modifier.fillMaxSize()) {
+                                        CompositionLocalProvider(LocalImageLoader provides swipeViewModel.imageLoader) {
+                                            SwipeableCard(
+                                                cardHeight = cardHeight,
+                                                animal = animal1,
+                                                leftAligned = false,
+                                                offset = -progress,
+                                            )
+
+                                            Spacer(modifier = Modifier.height(32.dp))
+
+                                            SwipeableCard(
+                                                cardHeight = cardHeight,
+                                                animal = animal2,
+                                                leftAligned = true,
+                                                offset = progress,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                is ComparisonState.Error -> {
+                    // The most common error will be a no such element, meaning the list is empty
+                    // so we should let the user know we are loading more
+                    Text(
+                        "Loading more...",
+                        modifier = Modifier.fillMaxSize(),
+                        textAlign = TextAlign.Center,
+                    )
+
+                    SwipeLoading()
+                }
             }
         }
     }
 }
 
 @Composable
-fun SwipeController(useTransitionData: @Composable (progress: Float) -> Unit) {
-    val offsetX = remember { Animatable(0f) }
+fun SwipeLoading() {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+    }
+}
 
+@Composable
+fun SwipeableCard(
+    cardHeight: Dp,
+    animal: Animal,
+    offset: Float,
+    leftAligned: Boolean
+) {
+    // Load the image using coil, we don't display a loading screen when the images are still
+    // loading, which we can do, but that is down the line work
+    val painter = rememberCoilPainter(
+        ImageRequest.Builder(LocalContext.current)
+            .data(animal.url)
+            .size(ImageSize.MEDIUM)
+            .precision(Precision.EXACT)
+            .build()
+    )
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth(),
+        contentAlignment = if (leftAligned) {
+            Alignment.CenterStart
+        } else {
+            Alignment.CenterEnd
+        }
+    ) {
+        val maxWidth = maxWidth
+
+        val leftAlignedAdjustment = if (leftAligned) 1f else -1f
+
+        val position: Dp
+        val alpha: Float
+        val rotation: Float
+
+        if (offset > 0f) {
+            // The animation parameters if this is the one you are selecting. It moves to just off
+            // the edge of the screen, it stays visible the entire time, and after the half way
+            // point it rotates 90 degrees in total
+            position = maxWidth * offset
+            alpha = 1f
+            rotation = (offset - 0.5f).coerceAtLeast(0f) * 180f
+        } else {
+            // The animation parameters if this is the one you aren't selecting. It stays still,
+            // but fades out, and is invisible by the half way point
+            position = 0.dp
+            alpha = 1f + offset * 2f
+            rotation = 0f
+        }
+
+        Image(
+            painter = painter,
+            contentDescription = null,
+            modifier = Modifier
+                .offset(position * leftAlignedAdjustment, 0.dp)
+                .alpha(alpha)
+                .rotate(rotation * leftAlignedAdjustment)
+                .requiredHeight(cardHeight)
+                .fillMaxWidth(0.6f),
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.Center,
+        )
+    }
+}
+
+@Composable
+fun SwipeController(
+    offsetX: Animatable<Float, AnimationVector1D>,
+    updateAnimation: @Composable (progress: Float) -> Unit,
+) {
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .pointerInput(Unit) {
                 val decay = splineBasedDecay<Float>(this)
+
                 coroutineScope {
                     while (true) {
                         // Detect a touch down event.
                         val pointerId = awaitPointerEventScope { awaitFirstDown().id }
                         val velocityTracker = VelocityTracker()
+
                         // Intercept an ongoing animation (if there's one).
                         offsetX.stop()
                         awaitPointerEventScope {
@@ -140,16 +274,19 @@ fun SwipeController(useTransitionData: @Composable (progress: Float) -> Unit) {
                                 )
                             }
                         }
+
                         val velocity = velocityTracker.calculateVelocity().x
                         val targetOffsetX = decay.calculateTargetValue(
                             offsetX.value,
                             velocity
                         )
+
                         // The animation stops when it reaches the bounds.
                         offsetX.updateBounds(
                             lowerBound = -size.width.toFloat(),
                             upperBound = size.width.toFloat()
                         )
+
                         launch {
                             if (targetOffsetX.absoluteValue <= size.width) {
                                 // Not enough velocity; Slide back.
@@ -166,69 +303,12 @@ fun SwipeController(useTransitionData: @Composable (progress: Float) -> Unit) {
                     }
                 }
             }) {
-        val normalizedOffset = offsetX.value / with(LocalDensity.current) {
+        // Normalise the offset based on the width of the screen, moving it into the range of -1f
+        // to 1f
+        val normalisedProgress = offsetX.value / with(LocalDensity.current) {
             maxWidth.toPx()
         }
 
-        useTransitionData(normalizedOffset)
-    }
-}
-
-@Composable
-fun SwipeableCard(animal: Animal, offset: Float, leftAligned: Boolean) {
-    val painter = rememberCoilPainter(animal.url)
-
-    BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxWidth(),
-    ) {
-        val maxWidth = maxWidth
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = if (leftAligned) {
-                Arrangement.Start
-            } else {
-                Arrangement.End
-            }
-        ) {
-            Image(
-                painter = painter,
-                contentDescription = null,
-                modifier = Modifier
-                    .offset(
-                        (if (offset > 0f) maxWidth * offset else 0.dp) * (if (leftAligned) 1f else -1f),
-                        0.dp
-                    )
-                    .alpha(if (offset < 0f) 1f + offset * 2f else 1f)
-                    .rotate(if (offset > 0f) (offset - 0.5f).coerceAtLeast(0f) * 180f * (if (leftAligned) 1f else -1f) else 0f)
-                    .fillMaxWidth(0.6f)
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Dog Swipe Screen Light Theme")
-@Composable
-fun DogSwipeScreenLightTheme() {
-    AnimalCompareTheme(darkTheme = false) {
-        Comparison(
-            animalType = AnimalType.Dog,
-            animal1 = FakeAnimal.getFakeAnimal(AnimalType.Dog),
-            animal2 = FakeAnimal.getFakeAnimal(AnimalType.Dog),
-        ) { _, _ -> }
-    }
-}
-
-@Preview(showBackground = true, name = "Dog Swipe Screen Dark Theme")
-@Composable
-fun DogSwipeScreenDarkTheme() {
-    AnimalCompareTheme(darkTheme = true) {
-        Comparison(
-            animalType = AnimalType.Dog,
-            animal1 = FakeAnimal.getFakeAnimal(AnimalType.Dog),
-            animal2 = FakeAnimal.getFakeAnimal(AnimalType.Dog),
-        ) { _, _ -> }
+        updateAnimation(normalisedProgress)
     }
 }

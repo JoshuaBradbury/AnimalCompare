@@ -17,6 +17,7 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$okhttp"
     implementation "com.squareup.okio:okio:$okio"
     implementation "com.squareup.retrofit2:retrofit:$retrofit"
+    implementation "com.squareup.retrofit2:converter-scalars:$retrofit"
 
     // Hilt
     implementation "com.google.dagger:hilt-android:$dagger"
@@ -31,6 +32,9 @@ dependencies {
 
     // Compose
     implementation "androidx.compose.runtime:runtime:$compose"
+
+    // Coil
+    implementation "io.coil-kt:coil:$coil"
 
     testImplementation "junit:junit:$junit"
     androidTestImplementation "androidx.test.ext:junit:$junitExt"
