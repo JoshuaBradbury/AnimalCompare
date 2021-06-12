@@ -22,7 +22,8 @@ import uk.co.newagedev.animalcompare.domain.model.Comparison
 import uk.co.newagedev.animalcompare.domain.model.ComparisonBacklog
 import javax.inject.Inject
 
-private const val LOAD_AMOUNT = 30
+private const val LOAD_AMOUNT = 20
+private const val MAX_FILE_SIZE_IN_BYTES = 1024 * 1024 // 1MB
 
 class AnimalRepository @Inject constructor(
     @ApplicationContext
@@ -90,28 +91,28 @@ class AnimalRepository @Inject constructor(
         val dogs = mutableListOf<String>()
 
         // As the API returns a random result, we could end up getting too many duplicates, in which
-        // case we should give up for now and try again later, even if this is running in a separate
-        // coroutine it will be restarted when the user swipes so this should be quicker than it
-        // takes the user to swipe through 10 animals
+        // case we should give up for now and try again later
         var counter = 0
 
-        while (dogs.size < count && counter < 100) {
-            val dog = dogApi.getRandomDog()
+        while (dogs.size < count && counter < 50) {
+            val dogResponse = dogApi.getRandomDog()
 
-            // Filter to just images, as the dog api can return videos too
-            if (listOf(".jpg", ".png", ".jpeg").any { dog.lowercase().contains(it) } &&
+            // Limit the file size of the dog images, so that they don't take too long to load
+            if (dogResponse.fileSizeBytes < MAX_FILE_SIZE_IN_BYTES &&
+                // Filter to just images, as the dog api can return videos too
+                listOf(".jpg", ".png", ".jpeg").any { dogResponse.url.lowercase().endsWith(it) } &&
                 // Make sure the animal doesn't exist locally already
-                !db.animalDao().doesExist(dog) &&
+                !db.animalDao().doesExist(dogResponse.url) &&
                 // Check we haven't already prepared the animal
-                !dogs.contains(dog)) {
-                dogs.add(dog)
+                !dogs.contains(dogResponse.url)
+            ) {
+                dogs.add(dogResponse.url)
             }
 
             counter += 1
         }
 
-        // Add the endpoint to the image url so that it is complete from this point on
-        return dogs.map { Animal(0, AnimalType.Dog.endpoint + it, AnimalType.Dog) }
+        return dogs.map { Animal(0, it, AnimalType.Dog) }
     }
 
     @OptIn(FlowPreview::class)

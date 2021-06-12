@@ -38,6 +38,7 @@ buildscript {
         okhttp = '4.9.1'
         okio = '2.10.0'
         retrofit = '2.9.0'
+        retrofitSerialization = '0.8.0'
 
         // testing
         junit = '4.13.2'
