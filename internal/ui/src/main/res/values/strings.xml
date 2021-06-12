@@ -3,6 +3,9 @@
 
     <!-- Swipe screen -->
     <string name="swipe_which_animal">Which %1$s do you prefer?</string>
+    <string name="swipe_swipe_to_select">Swipe to choose!</string>
+    <string name="swipe_animal_desc">Picture of an Animal</string>
+    <string name="swipe_arrow_desc">Swipe to choose</string>
 
     <!-- Screens -->
     <string name="screen_dog">Dogs</string>

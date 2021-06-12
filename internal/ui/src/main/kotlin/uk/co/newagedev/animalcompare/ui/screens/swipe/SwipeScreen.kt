@@ -13,17 +13,21 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -75,96 +79,142 @@ fun SwipeScreen(
         updateChoiceMade(null)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            stringResource(
-                R.string.swipe_which_animal,
-                stringResource(animalType.animalName)
-            ),
-            style = MaterialTheme.typography.h4,
+    CompositionLocalProvider(LocalImageLoader provides swipeViewModel.imageLoader) {
+        Column(
             modifier = Modifier
-                .padding(32.dp, 32.dp),
-            textAlign = TextAlign.Center
-        )
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            SwipeScreenTop(animalType)
 
-        // If a choice has been made lets just display a simple progress icon so that the user knows
-        // their choice is being submitted, with some near immediate feedback
+            SwipeScreenBody(offsetX, animalFlow, choiceMade, updateChoiceMade)
+        }
+    }
+}
+
+@Composable
+fun SwipeScreenBody(
+    offsetX: Animatable<Float, AnimationVector1D>,
+    animalFlow: State<ComparisonState>,
+    choiceMade: Pair<Animal, Animal>?,
+    updateChoiceMade: (Pair<Animal, Animal>?) -> Unit,
+) {
+    // Track number of swipes completed so that we can eventually hide the swipe arrows
+    val swipeCount = rememberSaveable { mutableStateOf(0) }
+
+    // Increment swipe count when a choice has been made
+    LaunchedEffect(choiceMade) {
         if (choiceMade != null) {
-            SwipeLoading()
-        } else {
-            when (animalFlow.value) {
-                is ComparisonState.Loading -> {
-                    SwipeLoading()
-                }
-                is ComparisonState.Success -> {
-                    val (animal1, animal2) = animalFlow.value as ComparisonState.Success
+            swipeCount.value += 1
+        }
+    }
 
-                    SwipeController(offsetX) { progress ->
-                        // When we reach one end of the animation, be it left or right, we should
-                        // submit which animal won the comparison, as the progress maps from -1f to
-                        // 1f this is easily achieved below
-                        when (progress) {
-                            1f -> {
-                                updateChoiceMade(animal2 to animal1)
-                            }
-                            -1f -> {
-                                updateChoiceMade(animal1 to animal2)
-                            }
-                            else -> {
-                                BoxWithConstraints(
-                                    modifier = Modifier
-                                        .fillMaxSize(),
-                                ) {
-                                    // Limit the card height to a fixed fraction, rather than
-                                    // relying on auto constraints to make it a percentage of the
-                                    // remaining screen height, probably a better way but this works
-                                    // for now
-                                    //
-                                    // TODO: use a different dynamic layout to clean this up a bit
-                                    val cardHeight = maxHeight * 0.4f
+    // If a choice has been made lets just display a simple progress icon so that the user knows
+    // their choice is being submitted, with some near immediate feedback
+    if (choiceMade != null) {
+        SwipeLoading()
+    } else {
+        when (animalFlow.value) {
+            is ComparisonState.Loading -> {
+                SwipeLoading()
+            }
+            is ComparisonState.Success -> {
+                val (animal1, animal2) = animalFlow.value as ComparisonState.Success
 
-                                    Column(modifier = Modifier.fillMaxSize()) {
-                                        CompositionLocalProvider(LocalImageLoader provides swipeViewModel.imageLoader) {
-                                            SwipeableCard(
-                                                cardHeight = cardHeight,
-                                                animal = animal1,
-                                                leftAligned = false,
-                                                offset = -progress,
-                                            )
-
-                                            Spacer(modifier = Modifier.height(32.dp))
-
-                                            SwipeableCard(
-                                                cardHeight = cardHeight,
-                                                animal = animal2,
-                                                leftAligned = true,
-                                                offset = progress,
-                                            )
-                                        }
-                                    }
-                                }
-                            }
+                SwipeController(offsetX) { progress ->
+                    // When we reach one end of the animation, be it left or right, we should
+                    // submit which animal won the comparison, as the progress maps from -1f to
+                    // 1f this is easily achieved below
+                    when (progress) {
+                        1f -> {
+                            updateChoiceMade(animal2 to animal1)
+                        }
+                        -1f -> {
+                            updateChoiceMade(animal1 to animal2)
+                        }
+                        else -> {
+                            SwipeOptions(animal1, animal2, progress, swipeCount.value)
                         }
                     }
                 }
-                is ComparisonState.Error -> {
-                    // The most common error will be a no such element, meaning the list is empty
-                    // so we should let the user know we are loading more
-                    Text(
-                        "Loading more...",
-                        modifier = Modifier.fillMaxSize(),
-                        textAlign = TextAlign.Center,
-                    )
+            }
+            is ComparisonState.Error -> {
+                // The most common error will be a no such element, meaning the list is empty
+                // so we should let the user know we are loading more
+                Text(
+                    "Loading more...",
+                    modifier = Modifier.fillMaxSize(),
+                    textAlign = TextAlign.Center,
+                )
 
-                    SwipeLoading()
-                }
+                SwipeLoading()
             }
         }
     }
+}
+
+@Composable
+fun SwipeOptions(
+    animal1: Animal,
+    animal2: Animal,
+    progress: Float,
+    swipeCount: Int,
+) {
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize(),
+    ) {
+        // Limit the card height to a fixed fraction, rather than
+        // relying on auto constraints to make it a percentage of the
+        // remaining screen height, probably a better way but this works
+        // for now
+        //
+        // TODO: use a different dynamic layout to clean this up a bit
+        val cardHeight = maxHeight * 0.4f
+
+        Column(modifier = Modifier.fillMaxSize()) {
+            SwipeableCard(
+                cardHeight = cardHeight,
+                animal = animal1,
+                leftAligned = false,
+                offset = -progress,
+                shouldShowArrow = swipeCount < 5,
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            SwipeableCard(
+                cardHeight = cardHeight,
+                animal = animal2,
+                leftAligned = true,
+                offset = progress,
+                shouldShowArrow = swipeCount < 5,
+            )
+        }
+    }
+}
+
+@Composable
+fun SwipeScreenTop(animalType: AnimalType) {
+    Text(
+        stringResource(
+            R.string.swipe_which_animal,
+            stringResource(animalType.animalName)
+        ),
+        style = MaterialTheme.typography.h4,
+        modifier = Modifier
+            .padding(start = 32.dp, top = 32.dp, end = 32.dp, bottom = 8.dp),
+        textAlign = TextAlign.Center,
+    )
+
+    Text(
+        stringResource(id = R.string.swipe_swipe_to_select),
+        style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Light),
+        modifier = Modifier
+            .padding(start = 32.dp, top = 0.dp, end = 32.dp, bottom = 16.dp),
+        textAlign = TextAlign.Center,
+    )
 }
 
 @Composable
@@ -182,7 +232,8 @@ fun SwipeableCard(
     cardHeight: Dp,
     animal: Animal,
     offset: Float,
-    leftAligned: Boolean
+    leftAligned: Boolean,
+    shouldShowArrow: Boolean,
 ) {
     // Load the image using coil, we don't display a loading screen when the images are still
     // loading, which we can do, but that is down the line work
@@ -226,9 +277,24 @@ fun SwipeableCard(
             rotation = 0f
         }
 
+        if (shouldShowArrow) {
+            // Arrow showing which way to swipe
+            Image(
+                painter = painterResource(R.drawable.ic_arrow),
+                contentDescription = stringResource(R.string.swipe_arrow_desc),
+                modifier = Modifier
+                    .fillMaxWidth(0.2f)
+                    .offset(maxWidth * 0.7f * leftAlignedAdjustment)
+                    .rotate(leftAlignedAdjustment.coerceAtMost(0f) * 180f)
+                    .alpha(1f - (offset.absoluteValue * 5f)),
+                colorFilter = ColorFilter.tint(MaterialTheme.colors.onSurface),
+            )
+        }
+
+        // Actual animal image they are choosing
         Image(
             painter = painter,
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.swipe_animal_desc),
             modifier = Modifier
                 .offset(position * leftAlignedAdjustment, 0.dp)
                 .alpha(alpha)
