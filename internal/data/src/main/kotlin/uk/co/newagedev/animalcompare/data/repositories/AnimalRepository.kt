@@ -2,7 +2,6 @@ package uk.co.newagedev.animalcompare.data.repositories
 
 import android.content.Context
 import androidx.room.withTransaction
-import coil.Coil
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.size.Precision
@@ -21,6 +20,7 @@ import uk.co.newagedev.animalcompare.data.room.AppDatabase
 import uk.co.newagedev.animalcompare.domain.model.Animal
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
 import uk.co.newagedev.animalcompare.domain.model.ComparisonBacklog
+import uk.co.newagedev.animalcompare.domain.room.relations.AnimalInBacklog
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -66,8 +66,12 @@ class AnimalRepository @Inject constructor(
             val animalIds = db.animalDao().addAnimals(animals)
 
             // Add the newly inserted animals to the backlog
-            db.comparisonBacklogDao().addToBacklog(animalIds.map { id ->
-                ComparisonBacklog(id.toInt())
+            db.comparisonBacklogDao().addToBacklog(animalIds.flatMap { id ->
+                listOf(
+                    ComparisonBacklog(0, id.toInt()),
+                    ComparisonBacklog(0, id.toInt()),
+                    ComparisonBacklog(0, id.toInt()),
+                )
             })
         }
 
@@ -120,12 +124,11 @@ class AnimalRepository @Inject constructor(
     }
 
     @OptIn(FlowPreview::class)
-    fun getComparisonBacklog(animalType: AnimalType): Flow<Pair<Animal, Animal>> {
+    fun getComparisonBacklog(animalType: AnimalType): Flow<Pair<AnimalInBacklog, AnimalInBacklog>> {
         return db.comparisonBacklogDao().getBacklog(animalType)
             .distinctUntilChanged()
             .map { backlog ->
                 backlog
-                    .map { it.animal }
                     // Pair the animals up to make it easier on the view model
                     .zipWithNext()
                     .first()

@@ -2,9 +2,11 @@ package uk.co.newagedev.animalcompare.data.room.daos
 
 import androidx.paging.PagingSource
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
 import uk.co.newagedev.animalcompare.domain.model.Comparison
 import uk.co.newagedev.animalcompare.domain.room.relations.AnimalComparison
+import uk.co.newagedev.animalcompare.domain.room.relations.FavouriteAnimal
 
 @Dao
 interface ComparisonDao {
@@ -47,6 +49,41 @@ interface ComparisonDao {
             """
     )
     fun getAllComparisonsByType(animalType: AnimalType): PagingSource<Int, AnimalComparison>
+
+    @Transaction
+    @Query(
+        """
+        SELECT comparisons.winner AS id,
+        animals.url AS url,
+        animals.type AS type,
+        COUNT(*) AS count,
+        MAX(dateCompared) AS lastSwiped
+        FROM comparisons
+        LEFT OUTER JOIN animals ON comparisons.winner = animals.id
+        WHERE animals.type = :animalType
+        GROUP BY comparisons.winner
+        ORDER BY count DESC
+        LIMIT :limit
+    """
+    )
+    fun getFavouritesBy(animalType: AnimalType, limit: Int): Flow<List<FavouriteAnimal>>
+
+    @Transaction
+    @Query(
+        """
+        SELECT comparisons.winner AS id,
+        animals.url AS url,
+        animals.type AS type,
+        COUNT(*) AS count,
+        MAX(dateCompared) AS lastSwiped
+        FROM comparisons
+        LEFT OUTER JOIN animals ON comparisons.winner = animals.id
+        GROUP BY comparisons.winner
+        ORDER BY count DESC
+        LIMIT :limit
+    """
+    )
+    fun getAllFavourites(limit: Int): Flow<List<FavouriteAnimal>>
 
     @Query("SELECT * FROM comparisons WHERE id = :id LIMIT 1")
     suspend fun getById(id: Int): Comparison

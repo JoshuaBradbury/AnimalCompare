@@ -10,7 +10,16 @@ import uk.co.newagedev.animalcompare.domain.room.relations.AnimalInBacklog
 interface ComparisonBacklogDao {
 
     @Transaction
-    @Query("SELECT to_compare.animal FROM to_compare LEFT OUTER JOIN animals ON to_compare.animal = animals.id WHERE type = :animalType ORDER BY animals.id")
+    @Query(
+        """
+        SELECT to_compare.id, 
+        to_compare.animal
+        FROM to_compare
+        LEFT OUTER JOIN animals ON to_compare.animal = animals.id
+         WHERE type = :animalType
+        ORDER BY animals.id
+    """
+    )
     fun getBacklog(animalType: AnimalType): Flow<List<AnimalInBacklog>>
 
     @Insert

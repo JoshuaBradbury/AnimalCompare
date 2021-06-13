@@ -27,10 +27,12 @@ sealed class AnimalTab(@StringRes val name: Int) : Parcelable {
     }
 
     companion object {
-        val values = listOf(
-            All,
-            Dog,
-        )
+        val values by lazy {
+            listOf(
+                All,
+                Dog,
+            )
+        }
     }
 }
 
