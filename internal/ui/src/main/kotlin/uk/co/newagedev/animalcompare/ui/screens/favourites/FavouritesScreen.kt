@@ -35,11 +35,14 @@ fun FavouritesScreen(viewModel: FavouritesViewModel = hiltViewModel()) {
 
     val favourites = viewModel.getFavourites(currentTab.toFilter()).collectAsState(null)
 
+    // Custom animal tabs composable to cleanup the root favourites screen composable
     AnimalTabs(
         currentTab = currentTab,
         updateCurrentTab = updateCurrentTab,
         tabs = AnimalTab.values,
     ) {
+        // If we haven't finished loading any favourites yet, we should show a progress indicator
+        // rather than the not enough swipes screen, in case the user has swiped enough
         if (favourites.value == null) {
             Column(
                 modifier = Modifier
@@ -49,6 +52,8 @@ fun FavouritesScreen(viewModel: FavouritesViewModel = hiltViewModel()) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         } else if (favourites.value!!.size < MIN_FAVOURITES || favourites.value!!.any { it.count < FAVOURITE_THRESHOLD }) {
+            // Checks if the user has enough animals that meet the count and vote thresholds, if not
+            // we should let them know they need to keep swiping
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -75,10 +80,12 @@ fun FavouriteList(
 
     val scrollState = rememberScrollState()
 
+    // Count how many images have successfully loaded, this way we can show the UI in one go,
+    // without fear of the views jumping
     var loadCount by rememberSaveable(favourites) { mutableStateOf(0) }
 
+    // Tracks when the content should be shown and animates it for a cleaner look and feel
     val (showContent, updateShowContent) = rememberSaveable(favourites) { mutableStateOf(false) }
-
     val loadedAnim = remember(favourites) { Animatable(if (showContent) 1f else 0f) }
     LaunchedEffect(showContent) {
         loadedAnim.animateTo(if (showContent) 1f else 0f)
@@ -90,6 +97,9 @@ fun FavouriteList(
             .alpha(loadedAnim.value),
     ) {
         favourites.forEachIndexed { index, animal ->
+            // The ranks should be the same if they share the same value, being the highest rank possible,
+            // but once there is one with a lower value it should be at it's current indexes rank, rather
+            // than an index below it
             if (animal.count < currentRankValue) {
                 currentRank = index + 1
                 currentRankValue = animal.count
@@ -104,6 +114,7 @@ fun FavouriteList(
         }
     }
 
+    // Progress indicator while we wait for the images to load
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -120,11 +131,14 @@ fun FavouriteAnimal(
     favourite: FavouriteAnimal,
     loaded: () -> Unit,
 ) {
+    // Load the large image using coil
     val largePainter = rememberCoilPainter(
         favourite.animal.url,
         fadeIn = true,
     )
 
+    // When the image has loaded we should propagate it up to the parent, so that the views can be
+    // displayed uniformly
     LaunchedEffect(largePainter.loadState) {
         if (largePainter.loadState is ImageLoadState.Success) {
             loaded()
@@ -134,6 +148,7 @@ fun FavouriteAnimal(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Rank title
         Text(
             text = stringResource(
                 R.string.favourite_rank,
