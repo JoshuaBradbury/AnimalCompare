@@ -1,7 +1,6 @@
 package uk.co.newagedev.animalcompare.ui.screens.swipe
 
 import androidx.lifecycle.ViewModel
-import coil.ImageLoader
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -22,7 +21,6 @@ import javax.inject.Inject
 class SwipeViewModel @Inject constructor(
     private val animalRepository: AnimalRepository,
     private val comparisonRepository: ComparisonRepository,
-    val imageLoader: ImageLoader,
 ) : ViewModel() {
 
     @OptIn(FlowPreview::class)

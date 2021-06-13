@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.coil.LocalImageLoader
 import uk.co.newagedev.animalcompare.domain.model.Animal
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
 import uk.co.newagedev.animalcompare.ui.utils.decayBasedSwipeAnimation
@@ -53,16 +52,14 @@ fun SwipeScreen(
         updateChoiceMade(null)
     }
 
-    CompositionLocalProvider(LocalImageLoader provides swipeViewModel.imageLoader) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            SwipeScreenTop(animalType)
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        SwipeScreenTop(animalType)
 
-            SwipeScreenBody(offsetX, animalFlow, choiceMade, updateChoiceMade)
-        }
+        SwipeScreenBody(offsetX, animalFlow, choiceMade, updateChoiceMade)
     }
 }
 

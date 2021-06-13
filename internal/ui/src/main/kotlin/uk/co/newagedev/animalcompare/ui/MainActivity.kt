@@ -8,8 +8,10 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -17,6 +19,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import coil.imageLoader
+import com.google.accompanist.coil.LocalImageLoader
 import dagger.hilt.android.AndroidEntryPoint
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
 import uk.co.newagedev.animalcompare.ui.screens.review.ReviewScreen
@@ -31,8 +35,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AnimalCompareTheme {
-                Surface(color = MaterialTheme.colors.background) {
-                    MainScreen()
+                CompositionLocalProvider(LocalImageLoader provides LocalContext.current.imageLoader) {
+                    Surface(color = MaterialTheme.colors.background) {
+                        MainScreen()
+                    }
                 }
             }
         }

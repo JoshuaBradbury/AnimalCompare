@@ -2,7 +2,8 @@ package uk.co.newagedev.animalcompare.data.repositories
 
 import android.content.Context
 import androidx.room.withTransaction
-import coil.ImageLoader
+import coil.Coil
+import coil.imageLoader
 import coil.request.ImageRequest
 import coil.size.Precision
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -33,7 +34,6 @@ class AnimalRepository @Inject constructor(
     private val db: AppDatabase,
     private val dogApi: DogApi,
     private val coroutineScope: CoroutineScope,
-    private val imageLoader: ImageLoader,
 ) {
 
     private var loadJob: Job? = null
@@ -86,7 +86,7 @@ class AnimalRepository @Inject constructor(
                 .precision(Precision.EXACT)
                 .build()
 
-            imageLoader
+            context.imageLoader
                 .execute(request)
         }
     }
