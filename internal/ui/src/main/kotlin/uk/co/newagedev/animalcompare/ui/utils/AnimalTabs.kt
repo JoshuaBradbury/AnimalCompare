@@ -25,6 +25,13 @@ sealed class AnimalTab(@StringRes val name: Int) : Parcelable {
             Dog -> AnimalFilter.DOG
         }
     }
+
+    companion object {
+        val values = listOf(
+            All,
+            Dog,
+        )
+    }
 }
 
 @Composable

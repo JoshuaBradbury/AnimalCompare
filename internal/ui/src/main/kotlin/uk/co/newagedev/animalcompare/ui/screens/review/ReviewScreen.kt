@@ -7,7 +7,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
@@ -50,13 +49,11 @@ fun ReviewScreen(viewModel: ReviewViewModel = hiltViewModel()) {
     val lazyComparisons = viewModel.getComparisons(currentTab.toFilter()).collectAsLazyPagingItems()
     val coroutineScope = rememberCoroutineScope()
 
+    // Custom animal tabs composable to cleanup the root review screen composable
     AnimalTabs(
         currentTab = currentTab,
         updateCurrentTab = updateCurrentTab,
-        tabs = listOf(
-            AnimalTab.All,
-            AnimalTab.Dog,
-        )
+        tabs = AnimalTab.values
     ) {
         ReviewList(it, {
             coroutineScope.launch {
@@ -72,12 +69,16 @@ private fun ReviewList(
     deleteComparison: (Int) -> Unit,
     lazyComparisons: LazyPagingItems<AnimalComparison>,
 ) {
-    val lazyListState = rememberLazyListState()
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        state = lazyListState,
     ) {
+        // We use a custom items function here so we can set the key properly. For some reason the
+        // paging library for compose is yet to add this, but it's important so that the list
+        // doesn't assume that a removal of a comparison is us just updating an existing cell,
+        // because the key is normally based on the position, so here we need to base it on the id.
+        // This can potentially crash if the data has yet to load, but it should have by this point
+        // being based on a room DB locally, if there was a network mediator in the mix it might not
+        // be possible to do this as cleanly
         items(lazyComparisons, key = {
             lazyComparisons.peek(it)!!.id
         }) { comparison ->
@@ -103,6 +104,8 @@ fun ComparisonCard(
     // investigating down the line
     val (expanded, updateExpanded) = rememberSaveable(tab) { mutableStateOf(false) }
 
+    // We need to store the large image size so that when the view recomposes and the image hasn't
+    // loaded yet it will not have to resize the view, which would normally lead to views jumping
     val largeImageSize = rememberSaveable { mutableStateOf(0) }
 
     // Load the image using coil, we don't display a loading screen when the images are still
@@ -116,11 +119,13 @@ fun ComparisonCard(
         fadeIn = true,
     )
 
-    val mediumPainter = rememberCoilPainter(
+    // Load the large image using coil
+    val largePainter = rememberCoilPainter(
         comparison.winner.url,
         fadeIn = true,
     )
 
+    // Manages the animation of the expansion
     val fadeSmall = remember { Animatable(if (expanded) 0f else 1f) }
     LaunchedEffect(expanded) {
         fadeSmall.animateTo(
@@ -132,6 +137,7 @@ fun ComparisonCard(
         )
     }
 
+    // Make it so anywhere tapped inside the cell will expand the view
     Column(modifier = Modifier.clickable {
         updateExpanded(!expanded)
     }) {
@@ -141,6 +147,9 @@ fun ComparisonCard(
                 .height(96.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            // This is the small image that displays in the unexpanded cell view. We could animate
+            // it to the bigger view, however given that the images are completely different
+            // resolutions and aspect rations it is cleaner to just fade this out.
             Image(
                 painter = smallPainter,
                 contentDescription = stringResource(id = R.string.swipe_animal_desc),
@@ -152,6 +161,7 @@ fun ComparisonCard(
                 alignment = Alignment.Center,
             )
 
+            // Text showing what date and time the user swiped at
             Text(
                 modifier = Modifier
                     .padding(start = 8.dp),
@@ -163,6 +173,7 @@ fun ComparisonCard(
                 style = MaterialTheme.typography.body1,
             )
 
+            // Indication of whether the cell is expanded or not using a dropdown style arrow
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.CenterEnd
@@ -181,13 +192,17 @@ fun ComparisonCard(
         }
 
         AnimatedVisibility(expanded) {
+            // To convert the height from the pixels of the image itself, and the Dp used to set the
+            // height we need a conversion, the best way is usually through some math, although
+            // this could potentially be moved into a util function I haven't explored it so, TODO?
             val one = with(LocalDensity.current) {
                 1.dp.toPx()
             }
 
             Column {
+                // The larger image, where we also have to store it's height for later compositions
                 Image(
-                    painter = mediumPainter,
+                    painter = largePainter,
                     contentDescription = stringResource(id = R.string.swipe_animal_desc),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -226,6 +241,8 @@ fun ComparisonCard(
 
 @Composable
 fun ComparisonPlaceholder() {
+    // Placeholder cell, we can display some mock data or greyed out versions of the view, but for
+    // now as long as the height is right it won't cause any jumping
     Row(
         modifier = Modifier
             .height(96.dp)
