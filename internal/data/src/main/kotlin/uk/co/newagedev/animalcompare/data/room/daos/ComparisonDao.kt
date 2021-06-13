@@ -48,6 +48,9 @@ interface ComparisonDao {
     )
     fun getAllComparisonsByType(animalType: AnimalType): PagingSource<Int, AnimalComparison>
 
+    @Query("SELECT * FROM comparisons WHERE id = :id LIMIT 1")
+    suspend fun getById(id: Int): Comparison
+
     @Delete
     suspend fun deleteComparison(comparison: Comparison)
 

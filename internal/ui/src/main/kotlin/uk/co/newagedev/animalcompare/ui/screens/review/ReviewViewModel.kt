@@ -18,6 +18,11 @@ class ReviewViewModel @Inject constructor(
     private val comparisonRepository: ComparisonRepository,
 ) : ViewModel() {
 
+    suspend fun deleteComparison(id: Int) {
+        comparisonRepository
+            .deleteComparison(id)
+    }
+
     fun getComparisons(animalFilter: AnimalFilter): Flow<PagingData<AnimalComparison>> {
         return comparisonRepository
             .getComparisons(animalFilter, PAGE_SIZE)

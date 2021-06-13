@@ -8,12 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,11 +28,13 @@ import androidx.paging.compose.items
 import coil.request.ImageRequest
 import coil.size.Precision
 import com.google.accompanist.coil.rememberCoilPainter
+import kotlinx.coroutines.launch
 import uk.co.newagedev.animalcompare.common.ImageSize
 import uk.co.newagedev.animalcompare.domain.room.relations.AnimalComparison
 import uk.co.newagedev.animalcompare.ui.R
 import uk.co.newagedev.animalcompare.ui.utils.AnimalTab
 import uk.co.newagedev.animalcompare.ui.utils.AnimalTabs
+import uk.co.newagedev.animalcompare.ui.utils.items
 import java.time.format.DateTimeFormatter
 
 
@@ -45,6 +43,7 @@ fun ReviewScreen(viewModel: ReviewViewModel = hiltViewModel()) {
     val (currentTab, updateCurrentTab) = rememberSaveable { mutableStateOf<AnimalTab>(AnimalTab.All) }
 
     val lazyComparisons = viewModel.getComparisons(currentTab.toFilter()).collectAsLazyPagingItems()
+    val coroutineScope = rememberCoroutineScope()
 
     AnimalTabs(
         currentTab = currentTab,
@@ -54,13 +53,18 @@ fun ReviewScreen(viewModel: ReviewViewModel = hiltViewModel()) {
             AnimalTab.Dog,
         )
     ) {
-        ReviewList(it, lazyComparisons)
+        ReviewList(it, {
+            coroutineScope.launch {
+                viewModel.deleteComparison(it)
+            }
+        }, lazyComparisons)
     }
 }
 
 @Composable
 private fun ReviewList(
     tab: AnimalTab,
+    deleteComparison: (Int) -> Unit,
     lazyComparisons: LazyPagingItems<AnimalComparison>,
 ) {
     val lazyListState = rememberLazyListState()
@@ -69,11 +73,13 @@ private fun ReviewList(
         modifier = Modifier.fillMaxSize(),
         state = lazyListState,
     ) {
-        items(lazyComparisons) { comparison ->
+        items(lazyComparisons, key = {
+            lazyComparisons.peek(it)!!.id
+        }) { comparison ->
             if (comparison == null) {
                 ComparisonPlaceholder()
             } else {
-                ComparisonCard(tab, comparison)
+                ComparisonCard(tab, deleteComparison, comparison)
             }
         }
     }
@@ -83,6 +89,7 @@ private fun ReviewList(
 @Composable
 fun ComparisonCard(
     tab: AnimalTab,
+    deleteComparison: (Int) -> Unit,
     comparison: AnimalComparison,
 ) {
     // In theory this is supposed to reset when tab changes, meaning that the expanded or not should
@@ -157,23 +164,41 @@ fun ComparisonCard(
                 1.dp.toPx()
             }
 
-            Image(
-                painter = mediumPainter,
-                contentDescription = stringResource(id = R.string.swipe_animal_desc),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .let {
-                        if (largeImageSize.value > 0) {
-                            it.height(Dp(largeImageSize.value / one))
-                        } else {
-                            it
+            Column {
+                Image(
+                    painter = mediumPainter,
+                    contentDescription = stringResource(id = R.string.swipe_animal_desc),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .let {
+                            if (largeImageSize.value > 0) {
+                                it.height(Dp(largeImageSize.value / one))
+                            } else {
+                                it
+                            }
                         }
-                    }
-                    .onGloballyPositioned {
-                        largeImageSize.value = it.size.height
+                        .onGloballyPositioned {
+                            largeImageSize.value = it.size.height
+                        },
+                    contentScale = ContentScale.FillWidth,
+                )
+
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .padding(4.dp),
+                    onClick = {
+                        deleteComparison(comparison.id)
                     },
-                contentScale = ContentScale.FillWidth,
-            )
+                    colors = ButtonDefaults.textButtonColors(),
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.review_delete_swipe),
+                        style = MaterialTheme.typography.button
+                    )
+                }
+            }
         }
     }
 }

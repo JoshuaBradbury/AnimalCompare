@@ -43,4 +43,11 @@ class ComparisonRepository @Inject constructor(
             }
         }.flow
     }
+
+    suspend fun deleteComparison(id: Int) {
+        db.withTransaction {
+            val comparison = db.comparisonDao().getById(id)
+            db.comparisonDao().deleteComparison(comparison)
+        }
+    }
 }
