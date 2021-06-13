@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -19,10 +20,18 @@ sealed class AnimalTab(@StringRes val name: Int) : Parcelable {
     @Parcelize
     object Dog : AnimalTab(R.string.tab_dogs)
 
+    @Parcelize
+    object Cat : AnimalTab(R.string.tab_cats)
+
+    @Parcelize
+    object Fox : AnimalTab(R.string.tab_foxes)
+
     fun toFilter(): AnimalFilter {
         return when (this) {
             All -> AnimalFilter.ALL
             Dog -> AnimalFilter.DOG
+            Cat -> AnimalFilter.CAT
+            Fox -> AnimalFilter.FOX
         }
     }
 
@@ -31,6 +40,8 @@ sealed class AnimalTab(@StringRes val name: Int) : Parcelable {
             listOf(
                 All,
                 Dog,
+                Cat,
+                Fox,
             )
         }
     }
@@ -74,7 +85,9 @@ fun AnimalTabs(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            tabView(currentTab)
+            key(currentTab) {
+                tabView(currentTab)
+            }
         }
     }
 }

@@ -10,7 +10,9 @@ class Converters {
     @TypeConverter
     fun toAnimalType(animalType: String?): AnimalType? {
         return when (animalType) {
+            "cat" -> AnimalType.Cat
             "dog" -> AnimalType.Dog
+            "fox" -> AnimalType.Fox
             else -> null
         }
     }

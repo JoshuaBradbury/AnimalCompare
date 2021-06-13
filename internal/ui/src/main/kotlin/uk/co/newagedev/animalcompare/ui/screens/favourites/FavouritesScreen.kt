@@ -27,7 +27,7 @@ import uk.co.newagedev.animalcompare.ui.utils.AnimalTabs
 import java.time.format.DateTimeFormatter
 
 private const val MIN_FAVOURITES = 10
-private const val FAVOURITE_THRESHOLD = 2
+private const val FAVOURITE_THRESHOLD = 1
 
 @Composable
 fun FavouritesScreen(viewModel: FavouritesViewModel = hiltViewModel()) {
@@ -85,7 +85,7 @@ fun FavouriteList(
     var loadCount by rememberSaveable(favourites) { mutableStateOf(0) }
 
     // Tracks when the content should be shown and animates it for a cleaner look and feel
-    val (showContent, updateShowContent) = rememberSaveable(favourites) { mutableStateOf(false) }
+    val (showContent, updateShowContent) = rememberSaveable(favourites) { mutableStateOf(loadCount >= favourites.size) }
     val loadedAnim = remember(favourites) { Animatable(if (showContent) 1f else 0f) }
     LaunchedEffect(showContent) {
         loadedAnim.animateTo(if (showContent) 1f else 0f)
@@ -105,10 +105,12 @@ fun FavouriteList(
                 currentRankValue = animal.count
             }
 
-            FavouriteAnimal(currentRank, animal) {
-                loadCount += 1
-                if (loadCount >= favourites.size) {
-                    updateShowContent(true)
+            key(animal.animal.id) {
+                FavouriteAnimal(currentRank, animal) {
+                    loadCount += 1
+                    if (loadCount >= favourites.size) {
+                        updateShowContent(true)
+                    }
                 }
             }
         }

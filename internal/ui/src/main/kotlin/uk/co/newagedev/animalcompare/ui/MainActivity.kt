@@ -90,6 +90,8 @@ fun MainScreen() {
             Modifier.padding(innerPadding)
         ) {
             composable(Screen.Dogs.route) { SwipeScreen(animalType = AnimalType.Dog) }
+            composable(Screen.Cats.route) { SwipeScreen(animalType = AnimalType.Cat) }
+            composable(Screen.Foxes.route) { SwipeScreen(animalType = AnimalType.Fox) }
             composable(Screen.Review.route) { ReviewScreen() }
             composable(Screen.TopAnimals.route) { FavouritesScreen() }
         }
