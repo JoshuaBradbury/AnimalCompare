@@ -1,7 +1,6 @@
 package uk.co.newagedev.animalcompare.ui
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -20,7 +19,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
-import uk.co.newagedev.animalcompare.ui.screens.Review
+import uk.co.newagedev.animalcompare.ui.screens.review.ReviewScreen
 import uk.co.newagedev.animalcompare.ui.screens.Screen
 import uk.co.newagedev.animalcompare.ui.screens.swipe.SwipeScreen
 import uk.co.newagedev.animalcompare.ui.screens.TopAnimals
@@ -85,7 +84,7 @@ fun MainScreen() {
             Modifier.padding(innerPadding)
         ) {
             composable(Screen.Dogs.route) { SwipeScreen(animalType = AnimalType.Dog) }
-            composable(Screen.Review.route) { Review() }
+            composable(Screen.Review.route) { ReviewScreen() }
             composable(Screen.TopAnimals.route) { TopAnimals() }
         }
     }
