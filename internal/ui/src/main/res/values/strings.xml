@@ -2,8 +2,9 @@
 <resources>
 
     <!-- Review screen -->
-    <string name="review_chose_on">Chosen on %1$s at %2$s</string>
+    <string name="review_chose_on">Swiped on %1$s at %2$s</string>
     <string name="review_delete_swipe">Delete swipe</string>
+    <string name="review_expand_desc">Expand animal swipe</string>
 
     <!-- Swipe screen -->
     <string name="swipe_which_animal">Which %1$s do you prefer?</string>

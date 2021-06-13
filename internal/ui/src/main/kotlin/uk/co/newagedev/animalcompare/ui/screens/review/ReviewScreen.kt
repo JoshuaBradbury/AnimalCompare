@@ -17,10 +17,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -118,7 +121,7 @@ fun ComparisonCard(
         fadeIn = true,
     )
 
-    val fadeSmall = remember { Animatable(1f) }
+    val fadeSmall = remember { Animatable(if (expanded) 0f else 1f) }
     LaunchedEffect(expanded) {
         fadeSmall.animateTo(
             if (expanded) {
@@ -159,6 +162,22 @@ fun ComparisonCard(
                 ),
                 style = MaterialTheme.typography.body1,
             )
+
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_dropdown),
+                    contentDescription = stringResource(R.string.review_expand_desc),
+                    modifier = Modifier
+                        .rotate(90f * fadeSmall.value)
+                        .offset(12.dp)
+                        .padding(end = 24.dp)
+                        .size(24.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colors.onSurface)
+                )
+            }
         }
 
         AnimatedVisibility(expanded) {
