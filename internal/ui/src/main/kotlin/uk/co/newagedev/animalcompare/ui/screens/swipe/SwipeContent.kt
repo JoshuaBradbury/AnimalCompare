@@ -11,31 +11,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.request.ImageRequest
-import coil.size.Precision
-import com.google.accompanist.coil.rememberCoilPainter
-import uk.co.newagedev.animalcompare.common.ImageSize
-import uk.co.newagedev.animalcompare.domain.model.Animal
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
 import uk.co.newagedev.animalcompare.ui.R
 import kotlin.math.absoluteValue
 
+private const val SWIPES_ARROW_VISIBLE = 10
+
 @Composable
 fun SwipeOptions(
-    animal1: Animal,
-    animal2: Animal,
+    animal1Painter: Painter,
+    animal2Painter: Painter,
     progress: Float,
     swipeCount: Int,
 ) {
-
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize(),
@@ -51,20 +47,20 @@ fun SwipeOptions(
         Column(modifier = Modifier.fillMaxSize()) {
             SwipeableCard(
                 cardHeight = cardHeight,
-                animal = animal1,
+                animalPainter = animal1Painter,
                 leftAligned = false,
                 offset = -progress,
-                shouldShowArrow = swipeCount < 5,
+                shouldShowArrow = swipeCount < SWIPES_ARROW_VISIBLE,
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             SwipeableCard(
                 cardHeight = cardHeight,
-                animal = animal2,
+                animalPainter = animal2Painter,
                 leftAligned = true,
                 offset = progress,
-                shouldShowArrow = swipeCount < 5,
+                shouldShowArrow = swipeCount < SWIPES_ARROW_VISIBLE,
             )
         }
     }
@@ -73,21 +69,11 @@ fun SwipeOptions(
 @Composable
 fun SwipeableCard(
     cardHeight: Dp,
-    animal: Animal,
+    animalPainter: Painter,
     offset: Float,
     leftAligned: Boolean,
     shouldShowArrow: Boolean,
 ) {
-    // Load the image using coil, we don't display a loading screen when the images are still
-    // loading, which we can do, but that is down the line work
-    val painter = rememberCoilPainter(
-        ImageRequest.Builder(LocalContext.current)
-            .data(animal.url)
-            .size(ImageSize.MEDIUM)
-            .precision(Precision.EXACT)
-            .build()
-    )
-
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth(),
@@ -136,7 +122,7 @@ fun SwipeableCard(
 
         // Actual animal image they are choosing
         Image(
-            painter = painter,
+            painter = animalPainter,
             contentDescription = stringResource(id = R.string.swipe_animal_desc),
             modifier = Modifier
                 .offset(position * leftAlignedAdjustment, 0.dp)
