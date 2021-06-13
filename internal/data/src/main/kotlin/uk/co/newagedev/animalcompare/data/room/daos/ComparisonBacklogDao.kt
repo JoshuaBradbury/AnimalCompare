@@ -17,7 +17,7 @@ interface ComparisonBacklogDao {
         FROM to_compare
         LEFT OUTER JOIN animals ON to_compare.animal = animals.id
          WHERE type = :animalType
-        ORDER BY animals.id
+        ORDER BY to_compare.id
     """
     )
     fun getBacklog(animalType: AnimalType): Flow<List<AnimalInBacklog>>

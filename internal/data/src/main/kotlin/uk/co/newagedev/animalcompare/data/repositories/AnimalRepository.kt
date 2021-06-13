@@ -9,9 +9,13 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import uk.co.newagedev.animalcompare.common.ImageSize
+import uk.co.newagedev.animalcompare.data.api.CatApi
 import uk.co.newagedev.animalcompare.data.api.DogApi
 import uk.co.newagedev.animalcompare.data.room.AppDatabase
 import uk.co.newagedev.animalcompare.domain.model.Animal
@@ -34,25 +38,28 @@ class AnimalRepository @Inject constructor(
     private val context: Context,
     private val db: AppDatabase,
     private val dogApi: DogApi,
+    private val catApi: CatApi,
     private val coroutineScope: CoroutineScope,
 ) {
 
-    private var loadJob: Job? = null
-
     init {
-        coroutineScope.launch {
-            val dogsToCompare = db.comparisonBacklogDao().getBacklog(AnimalType.Dog)
-            dogsToCompare
-                .distinctUntilChanged()
-                .collectLatest {
-                    if (it.size < LOAD_AMOUNT / 2) {
-                        if (loadJob == null || loadJob?.isCompleted == true) {
-                            loadJob = coroutineScope.launch {
-                                loadMoreAnimals(AnimalType.Dog)
+        for (animalType in listOf(AnimalType.Dog, AnimalType.Cat)) {
+            var loadJob: Job? = null
+
+            coroutineScope.launch {
+                db.comparisonBacklogDao().getBacklog(animalType)
+                    .distinctUntilChanged()
+                    .collectLatest {
+                        if (it.size < LOAD_AMOUNT / 2) {
+                            if (loadJob == null || loadJob?.isCompleted == true) {
+                                loadJob = coroutineScope.launch {
+                                    loadMoreAnimals(animalType)
+                                }
                             }
                         }
                     }
-                }
+
+            }
         }
     }
 
@@ -60,6 +67,7 @@ class AnimalRepository @Inject constructor(
         // Fetches more animals based on the type
         val animals = when (animalType) {
             AnimalType.Dog -> loadMoreDogs(LOAD_AMOUNT)
+            AnimalType.Cat -> loadMoreCats(LOAD_AMOUNT)
         }
 
         db.withTransaction {
@@ -92,7 +100,8 @@ class AnimalRepository @Inject constructor(
         }
 
         db.withTransaction {
-            val animalsToRecycle = db.animalDao().getRandomAnimals(animalType, recycleAmount).distinct()
+            val animalsToRecycle =
+                db.animalDao().getRandomAnimals(animalType, recycleAmount).distinct()
             val currentBacklog = db.comparisonBacklogDao().getCurrentBacklog()
 
             db.comparisonBacklogDao()
@@ -144,6 +153,30 @@ class AnimalRepository @Inject constructor(
         }
 
         return dogs.map { Animal(0, it, AnimalType.Dog) }
+    }
+
+    private suspend fun loadMoreCats(count: Int): List<Animal> {
+        val cats = mutableListOf<String>()
+
+        // As the API returns a random result, we could end up getting too many duplicates, in which
+        // case we should give up for now and try again later
+        var counter = 0
+
+        while (cats.size < count && counter < 50) {
+            val catResponse = catApi.getRandomCat()
+
+            // Make sure the animal doesn't exist locally already
+            if (!db.animalDao().doesExist(catResponse.file) &&
+                // Check we haven't already prepared the animal
+                !cats.contains(catResponse.file)
+            ) {
+                cats.add(catResponse.file)
+            }
+
+            counter += 1
+        }
+
+        return cats.map { Animal(0, it, AnimalType.Cat) }
     }
 
     @OptIn(FlowPreview::class)

@@ -2,4 +2,5 @@
 <resources>
 
     <string name="animal_dog">Dog</string>
+    <string name="animal_cat">Cat</string>
 </resources>

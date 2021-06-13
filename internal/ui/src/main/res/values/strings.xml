@@ -19,9 +19,9 @@
     <!-- Animal Tabs -->
     <string name="tab_all">All</string>
     <string name="tab_dogs">Dogs</string>
+    <string name="tab_cats">Cats</string>
 
     <!-- Screens -->
-    <string name="screen_dog">Dogs</string>
     <string name="screen_review">Swipes</string>
     <string name="screen_top_animals">Favourites</string>
 </resources>

@@ -1,6 +1,5 @@
 package uk.co.newagedev.animalcompare.data.api
 
-import android.util.Log
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
@@ -14,7 +13,7 @@ import uk.co.newagedev.animalcompare.domain.model.AnimalType
 
 @Module
 @InstallIn(SingletonComponent::class)
-class AnimalProvider {
+class AnimalApiProvider {
 
     @OptIn(ExperimentalSerializationApi::class)
     @Provides
@@ -25,6 +24,17 @@ class AnimalProvider {
             .build()
 
         return retrofit.create(DogApi::class.java)
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @Provides
+    fun getCatApi(): CatApi {
+        val retrofit = Retrofit.Builder()
+            .baseUrl(AnimalType.Cat.endpoint)
+            .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+            .build()
+
+        return retrofit.create(CatApi::class.java)
     }
 
 }
