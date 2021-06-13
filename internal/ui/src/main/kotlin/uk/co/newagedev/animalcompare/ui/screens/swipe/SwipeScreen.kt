@@ -1,5 +1,6 @@
 package uk.co.newagedev.animalcompare.ui.screens.swipe
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -10,10 +11,15 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
-import uk.co.newagedev.animalcompare.domain.model.Animal
+import coil.request.ImageRequest
+import coil.size.Precision
+import com.google.accompanist.coil.rememberCoilPainter
+import com.google.accompanist.imageloading.ImageLoadState
+import uk.co.newagedev.animalcompare.common.ImageSize
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
 import uk.co.newagedev.animalcompare.domain.room.relations.AnimalInBacklog
 import uk.co.newagedev.animalcompare.ui.utils.decayBasedSwipeAnimation
@@ -68,6 +74,7 @@ fun SwipeScreen(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun SwipeScreenBody(
     offsetX: Animatable<Float, AnimationVector1D>,
@@ -77,7 +84,6 @@ fun SwipeScreenBody(
 ) {
     // Track number of swipes completed so that we can eventually hide the swipe arrows
     val swipeCount = rememberSaveable { mutableStateOf(0) }
-
     // Increment swipe count when a choice has been made
     LaunchedEffect(choiceMade) {
         if (choiceMade != null) {
@@ -97,37 +103,13 @@ fun SwipeScreenBody(
             is ComparisonState.Success -> {
                 val (animal1, animal2) = animalFlow.value as ComparisonState.Success
 
-                BoxWithConstraints(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .decayBasedSwipeAnimation(offsetX)
-                ) {
-                    // Normalise the offset based on the width of the screen, moving it into the range of -1f
-                    // to 1f
-                    val normalisedProgress = offsetX.value / with(LocalDensity.current) {
-                        maxWidth.toPx()
-                    }
-
-                    // When we reach one end of the animation, be it left or right, we should
-                    // submit which animal won the comparison, as the progress maps from -1f to
-                    // 1f this is easily achieved below
-                    when (normalisedProgress) {
-                        1f -> {
-                            updateChoiceMade(animal2 to animal1)
-                        }
-                        -1f -> {
-                            updateChoiceMade(animal1 to animal2)
-                        }
-                        else -> {
-                            SwipeOptions(
-                                animal1.animal,
-                                animal2.animal,
-                                normalisedProgress,
-                                swipeCount.value
-                            )
-                        }
-                    }
-                }
+                SwipeAnimals(
+                    animal1,
+                    animal2,
+                    offsetX,
+                    updateChoiceMade,
+                    swipeCount.value,
+                )
             }
             is ComparisonState.Error -> {
                 // The most common error will be a no such element, meaning the list is empty
@@ -139,6 +121,74 @@ fun SwipeScreenBody(
                 )
 
                 SwipeLoading()
+            }
+        }
+    }
+}
+
+@Composable
+fun SwipeAnimals(
+    animal1: AnimalInBacklog,
+    animal2: AnimalInBacklog,
+    offsetX: Animatable<Float, AnimationVector1D>,
+    updateChoiceMade: (Pair<AnimalInBacklog, AnimalInBacklog>?) -> Unit,
+    swipeCount: Int,
+) {
+    // Load the images using coil
+    val animal1Painter = rememberCoilPainter(
+        ImageRequest.Builder(LocalContext.current)
+            .data(animal1.animal.url)
+            .size(ImageSize.MEDIUM)
+            .precision(Precision.EXACT)
+            .build()
+    )
+
+    val animal2Painter = rememberCoilPainter(
+        ImageRequest.Builder(LocalContext.current)
+            .data(animal2.animal.url)
+            .size(ImageSize.MEDIUM)
+            .precision(Precision.EXACT)
+            .build()
+    )
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .let {
+                if (animal1Painter.loadState is ImageLoadState.Success && animal2Painter.loadState is ImageLoadState.Success) {
+                    it.decayBasedSwipeAnimation(offsetX)
+                } else {
+                    it
+                }
+            }
+    ) {
+        // Normalise the offset based on the width of the screen, moving it into the range of -1f
+        // to 1f
+        val normalisedProgress = offsetX.value / with(LocalDensity.current) {
+            maxWidth.toPx()
+        }
+
+        // When we reach one end of the animation, be it left or right, we should
+        // submit which animal won the comparison, as the progress maps from -1f to
+        // 1f this is easily achieved below
+        when (normalisedProgress) {
+            1f -> {
+                updateChoiceMade(animal2 to animal1)
+            }
+            -1f -> {
+                updateChoiceMade(animal1 to animal2)
+            }
+            else -> {
+                if (animal1Painter.loadState is ImageLoadState.Success && animal2Painter.loadState is ImageLoadState.Success) {
+                    SwipeOptions(
+                        animal1Painter,
+                        animal2Painter,
+                        normalisedProgress,
+                        swipeCount,
+                    )
+                } else {
+                    SwipeLoading()
+                }
             }
         }
     }
