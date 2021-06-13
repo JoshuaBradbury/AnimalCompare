@@ -23,11 +23,15 @@ sealed class AnimalTab(@StringRes val name: Int) : Parcelable {
     @Parcelize
     object Cat : AnimalTab(R.string.tab_cats)
 
+    @Parcelize
+    object Fox : AnimalTab(R.string.tab_foxes)
+
     fun toFilter(): AnimalFilter {
         return when (this) {
             All -> AnimalFilter.ALL
             Dog -> AnimalFilter.DOG
             Cat -> AnimalFilter.CAT
+            Fox -> AnimalFilter.FOX
         }
     }
 
@@ -37,6 +41,7 @@ sealed class AnimalTab(@StringRes val name: Int) : Parcelable {
                 All,
                 Dog,
                 Cat,
+                Fox,
             )
         }
     }

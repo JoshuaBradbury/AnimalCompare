@@ -27,7 +27,7 @@ import uk.co.newagedev.animalcompare.ui.utils.AnimalTabs
 import java.time.format.DateTimeFormatter
 
 private const val MIN_FAVOURITES = 10
-private const val FAVOURITE_THRESHOLD = 2
+private const val FAVOURITE_THRESHOLD = 1
 
 @Composable
 fun FavouritesScreen(viewModel: FavouritesViewModel = hiltViewModel()) {

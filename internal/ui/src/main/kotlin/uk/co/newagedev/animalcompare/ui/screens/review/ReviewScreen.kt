@@ -107,7 +107,7 @@ fun ComparisonCard(
 
     // We need to store the large image size so that when the view recomposes and the image hasn't
     // loaded yet it will not have to resize the view, which would normally lead to views jumping
-    val largeImageSize = rememberSaveable { mutableStateOf(0) }
+    val largeImageSize = remember { mutableStateOf(0) }
 
     // Load the image using coil, we don't display a loading screen when the images are still
     // loading, which we can do, but that is down the line work

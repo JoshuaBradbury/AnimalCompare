@@ -37,4 +37,15 @@ class AnimalApiProvider {
         return retrofit.create(CatApi::class.java)
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
+    @Provides
+    fun getFoxApi(): FoxApi {
+        val retrofit = Retrofit.Builder()
+            .baseUrl(AnimalType.Fox.endpoint)
+            .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+            .build()
+
+        return retrofit.create(FoxApi::class.java)
+    }
+
 }

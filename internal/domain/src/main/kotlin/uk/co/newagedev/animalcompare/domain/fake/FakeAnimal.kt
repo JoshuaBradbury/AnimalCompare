@@ -26,6 +26,9 @@ object FakeAnimal {
             is AnimalType.Cat -> {
                 dogs.random()
             }
+            is AnimalType.Fox -> {
+                dogs.random()
+            }
         }
     }
 }

@@ -20,6 +20,7 @@
     <string name="tab_all">All</string>
     <string name="tab_dogs">Dogs</string>
     <string name="tab_cats">Cats</string>
+    <string name="tab_foxes">Foxes</string>
 
     <!-- Screens -->
     <string name="screen_review">Swipes</string>
