@@ -1,7 +1,6 @@
 package uk.co.newagedev.animalcompare.ui
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -9,8 +8,10 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -18,9 +19,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import coil.imageLoader
+import com.google.accompanist.coil.LocalImageLoader
 import dagger.hilt.android.AndroidEntryPoint
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
-import uk.co.newagedev.animalcompare.ui.screens.Review
+import uk.co.newagedev.animalcompare.ui.screens.review.ReviewScreen
 import uk.co.newagedev.animalcompare.ui.screens.Screen
 import uk.co.newagedev.animalcompare.ui.screens.swipe.SwipeScreen
 import uk.co.newagedev.animalcompare.ui.screens.TopAnimals
@@ -32,8 +35,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AnimalCompareTheme {
-                Surface(color = MaterialTheme.colors.background) {
-                    MainScreen()
+                CompositionLocalProvider(LocalImageLoader provides LocalContext.current.imageLoader) {
+                    Surface(color = MaterialTheme.colors.background) {
+                        MainScreen()
+                    }
                 }
             }
         }
@@ -85,7 +90,7 @@ fun MainScreen() {
             Modifier.padding(innerPadding)
         ) {
             composable(Screen.Dogs.route) { SwipeScreen(animalType = AnimalType.Dog) }
-            composable(Screen.Review.route) { Review() }
+            composable(Screen.Review.route) { ReviewScreen() }
             composable(Screen.TopAnimals.route) { TopAnimals() }
         }
     }

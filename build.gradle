@@ -21,6 +21,8 @@ buildscript {
         navigation = '2.3.5'
         hiltNavigationCompose = '1.0.0-alpha02'
         room = '2.3.0'
+        paging = '3.0.0'
+        pagingCompose = '1.0.0-alpha10'
 
         // KotlinX
         coroutines = '1.4.3'
@@ -76,6 +78,10 @@ allprojects {
 subprojects {
     afterEvaluate { project ->
         if (project.hasProperty('android')) {
+            dependencies {
+                coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+            }
+
             android {
                 compileSdkVersion compileSdkVer
 
@@ -91,6 +97,8 @@ subprojects {
                 }
 
                 compileOptions {
+                    coreLibraryDesugaringEnabled true
+
                     sourceCompatibility JavaVersion.VERSION_1_8
                     targetCompatibility JavaVersion.VERSION_1_8
                 }

@@ -1,4 +1,4 @@
-package uk.co.newagedev.animalcompare.domain.room.daos
+package uk.co.newagedev.animalcompare.data.room.daos
 
 import androidx.room.Dao
 import androidx.room.Insert

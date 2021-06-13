@@ -1,7 +1,9 @@
-package uk.co.newagedev.animalcompare.data
+package uk.co.newagedev.animalcompare.data.repositories
 
 import android.content.Context
-import coil.ImageLoader
+import androidx.room.withTransaction
+import coil.Coil
+import coil.imageLoader
 import coil.request.ImageRequest
 import coil.size.Precision
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -18,20 +20,20 @@ import uk.co.newagedev.animalcompare.data.api.DogApi
 import uk.co.newagedev.animalcompare.data.room.AppDatabase
 import uk.co.newagedev.animalcompare.domain.model.Animal
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
-import uk.co.newagedev.animalcompare.domain.model.Comparison
 import uk.co.newagedev.animalcompare.domain.model.ComparisonBacklog
 import javax.inject.Inject
+import javax.inject.Singleton
 
 private const val LOAD_AMOUNT = 20
 private const val MAX_FILE_SIZE_IN_BYTES = 1024 * 1024 // 1MB
 
+@Singleton
 class AnimalRepository @Inject constructor(
     @ApplicationContext
     private val context: Context,
     private val db: AppDatabase,
     private val dogApi: DogApi,
     private val coroutineScope: CoroutineScope,
-    private val imageLoader: ImageLoader,
 ) {
 
     private var loadJob: Job? = null
@@ -59,13 +61,15 @@ class AnimalRepository @Inject constructor(
             AnimalType.Dog -> loadMoreDogs(LOAD_AMOUNT)
         }
 
-        // Insert the animals and get their id's so we can store them in the ComparisonBacklog
-        val animalIds = db.animalDao().addAnimals(animals)
+        db.withTransaction {
+            // Insert the animals and get their id's so we can store them in the ComparisonBacklog
+            val animalIds = db.animalDao().addAnimals(animals)
 
-        // Add the newly inserted animals to the backlog
-        db.comparisonBacklogDao().addToBacklog(animalIds.map { id ->
-            ComparisonBacklog(id.toInt())
-        })
+            // Add the newly inserted animals to the backlog
+            db.comparisonBacklogDao().addToBacklog(animalIds.map { id ->
+                ComparisonBacklog(id.toInt())
+            })
+        }
 
         // Preload their images, without blocking the request
         coroutineScope.launch {
@@ -82,7 +86,7 @@ class AnimalRepository @Inject constructor(
                 .precision(Precision.EXACT)
                 .build()
 
-            imageLoader
+            context.imageLoader
                 .execute(request)
         }
     }
@@ -116,7 +120,7 @@ class AnimalRepository @Inject constructor(
     }
 
     @OptIn(FlowPreview::class)
-    fun getAnimalFlow(animalType: AnimalType): Flow<Pair<Animal, Animal>> {
+    fun getComparisonBacklog(animalType: AnimalType): Flow<Pair<Animal, Animal>> {
         return db.comparisonBacklogDao().getBacklog(animalType)
             .distinctUntilChanged()
             .map { backlog ->
@@ -126,16 +130,5 @@ class AnimalRepository @Inject constructor(
                     .zipWithNext()
                     .first()
             }
-    }
-
-    suspend fun submitComparison(comparison: Comparison) {
-        db.comparisonDao().addComparison(comparison)
-
-        db.comparisonBacklogDao().removeFromBacklog(
-            listOf(
-                ComparisonBacklog(comparison.winner),
-                ComparisonBacklog(comparison.loser)
-            )
-        )
     }
 }

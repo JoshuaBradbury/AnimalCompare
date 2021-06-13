@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Review screen -->
+    <string name="review_chose_on">Swiped on %1$s at %2$s</string>
+    <string name="review_delete_swipe">Delete swipe</string>
+    <string name="review_expand_desc">Expand animal swipe</string>
+
     <!-- Swipe screen -->
     <string name="swipe_which_animal">Which %1$s do you prefer?</string>
     <string name="swipe_swipe_to_select">Swipe to choose!</string>
     <string name="swipe_animal_desc">Picture of an Animal</string>
     <string name="swipe_arrow_desc">Swipe to choose</string>
+
+    <!-- Animal Tabs -->
+    <string name="tab_all">All</string>
+    <string name="tab_dogs">Dogs</string>
 
     <!-- Screens -->
     <string name="screen_dog">Dogs</string>
