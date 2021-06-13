@@ -66,12 +66,8 @@ class AnimalRepository @Inject constructor(
             val animalIds = db.animalDao().addAnimals(animals)
 
             // Add the newly inserted animals to the backlog
-            db.comparisonBacklogDao().addToBacklog(animalIds.flatMap { id ->
-                listOf(
-                    ComparisonBacklog(0, id.toInt()),
-                    ComparisonBacklog(0, id.toInt()),
-                    ComparisonBacklog(0, id.toInt()),
-                )
+            db.comparisonBacklogDao().addToBacklog(animalIds.map { id ->
+                ComparisonBacklog(0, id.toInt())
             })
         }
 
