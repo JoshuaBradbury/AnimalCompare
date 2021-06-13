@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Favourites screen -->
+    <string name="favourite_rank">%1$d. Last swiped on %2$s at %3$s</string>
+    <string name="favourite_not_enough">You haven\'t swiped enough animals to see this list, swipe more and check back later!</string>
+
     <!-- Review screen -->
     <string name="review_chose_on">Swiped on %1$s at %2$s</string>
     <string name="review_delete_swipe">Delete swipe</string>
