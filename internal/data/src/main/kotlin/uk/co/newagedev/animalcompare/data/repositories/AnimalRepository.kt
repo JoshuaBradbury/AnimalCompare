@@ -9,10 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import uk.co.newagedev.animalcompare.common.ImageSize
 import uk.co.newagedev.animalcompare.data.api.DogApi
@@ -26,6 +23,10 @@ import javax.inject.Singleton
 
 private const val LOAD_AMOUNT = 20
 private const val MAX_FILE_SIZE_IN_BYTES = 1024 * 1024 // 1MB
+
+private const val RECYCLE_COUNT = 20
+private const val RECYCLE_THRESHOLD_MIN = 40
+private const val RECYCLE_THRESHOLD_MAX = 200
 
 @Singleton
 class AnimalRepository @Inject constructor(
@@ -74,6 +75,32 @@ class AnimalRepository @Inject constructor(
         // Preload their images, without blocking the request
         coroutineScope.launch {
             preloadImages(animals.sortedBy { it.id }.map { it.url })
+        }
+
+        recycleAnimals(animalType)
+    }
+
+    private suspend fun recycleAnimals(animalType: AnimalType) {
+        val totalAnimals = db.animalDao().getAnimalCountByType(animalType)
+
+        val recycleAmount = when {
+            totalAnimals > RECYCLE_THRESHOLD_MAX -> RECYCLE_COUNT
+            totalAnimals > RECYCLE_THRESHOLD_MIN -> {
+                RECYCLE_COUNT * (totalAnimals - RECYCLE_THRESHOLD_MIN) / (RECYCLE_THRESHOLD_MAX - RECYCLE_THRESHOLD_MIN)
+            }
+            else -> return
+        }
+
+        db.withTransaction {
+            val animalsToRecycle = db.animalDao().getRandomAnimals(animalType, recycleAmount).distinct()
+            val currentBacklog = db.comparisonBacklogDao().getCurrentBacklog()
+
+            db.comparisonBacklogDao()
+                .addToBacklog(animalsToRecycle
+                    .filter { animal -> !currentBacklog.any { it.animal == animal } }
+                    .map { id ->
+                        ComparisonBacklog(0, id)
+                    })
         }
     }
 
