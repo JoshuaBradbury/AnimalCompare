@@ -26,7 +26,7 @@ import uk.co.newagedev.animalcompare.domain.model.AnimalType
 import uk.co.newagedev.animalcompare.ui.screens.review.ReviewScreen
 import uk.co.newagedev.animalcompare.ui.screens.Screen
 import uk.co.newagedev.animalcompare.ui.screens.swipe.SwipeScreen
-import uk.co.newagedev.animalcompare.ui.screens.TopAnimals
+import uk.co.newagedev.animalcompare.ui.screens.favourites.FavouritesScreen
 import uk.co.newagedev.animalcompare.ui.theme.AnimalCompareTheme
 
 @AndroidEntryPoint
@@ -91,7 +91,7 @@ fun MainScreen() {
         ) {
             composable(Screen.Dogs.route) { SwipeScreen(animalType = AnimalType.Dog) }
             composable(Screen.Review.route) { ReviewScreen() }
-            composable(Screen.TopAnimals.route) { TopAnimals() }
+            composable(Screen.TopAnimals.route) { FavouritesScreen() }
         }
     }
 }

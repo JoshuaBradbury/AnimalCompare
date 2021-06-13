@@ -53,7 +53,7 @@ fun ReviewScreen(viewModel: ReviewViewModel = hiltViewModel()) {
     AnimalTabs(
         currentTab = currentTab,
         updateCurrentTab = updateCurrentTab,
-        tabs = AnimalTab.values
+        tabs = AnimalTab.values,
     ) {
         ReviewList(it, {
             coroutineScope.launch {

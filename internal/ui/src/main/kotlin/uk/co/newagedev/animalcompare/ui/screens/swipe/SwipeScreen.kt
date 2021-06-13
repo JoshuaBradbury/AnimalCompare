@@ -15,6 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import uk.co.newagedev.animalcompare.domain.model.Animal
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
+import uk.co.newagedev.animalcompare.domain.room.relations.AnimalInBacklog
 import uk.co.newagedev.animalcompare.ui.utils.decayBasedSwipeAnimation
 
 @Composable
@@ -33,7 +34,11 @@ fun SwipeScreen(
 
     // Hold the state of whether a choice has been made or not, so that we can hide the swipe view
     // and reset it off screen, removing any jumps or other visual side effects
-    val (choiceMade, updateChoiceMade) = remember { mutableStateOf<Pair<Animal, Animal>?>(null) }
+    val (choiceMade, updateChoiceMade) = remember {
+        mutableStateOf<Pair<AnimalInBacklog, AnimalInBacklog>?>(
+            null
+        )
+    }
 
     // Every time the choiceMade variable updates, we should check if it has a value, without
     // blocking the UI, and if so we should submit it and reset the swipe view
@@ -67,8 +72,8 @@ fun SwipeScreen(
 fun SwipeScreenBody(
     offsetX: Animatable<Float, AnimationVector1D>,
     animalFlow: State<ComparisonState>,
-    choiceMade: Pair<Animal, Animal>?,
-    updateChoiceMade: (Pair<Animal, Animal>?) -> Unit,
+    choiceMade: Pair<AnimalInBacklog, AnimalInBacklog>?,
+    updateChoiceMade: (Pair<AnimalInBacklog, AnimalInBacklog>?) -> Unit,
 ) {
     // Track number of swipes completed so that we can eventually hide the swipe arrows
     val swipeCount = rememberSaveable { mutableStateOf(0) }
@@ -114,7 +119,12 @@ fun SwipeScreenBody(
                             updateChoiceMade(animal1 to animal2)
                         }
                         else -> {
-                            SwipeOptions(animal1, animal2, normalisedProgress, swipeCount.value)
+                            SwipeOptions(
+                                animal1.animal,
+                                animal2.animal,
+                                normalisedProgress,
+                                swipeCount.value
+                            )
                         }
                     }
                 }
