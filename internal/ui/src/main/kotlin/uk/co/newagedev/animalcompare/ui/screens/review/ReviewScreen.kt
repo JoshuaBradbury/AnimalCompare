@@ -85,7 +85,9 @@ private fun ReviewList(
             if (comparison == null) {
                 ComparisonPlaceholder()
             } else {
-                ComparisonCard(tab, deleteComparison, comparison)
+                key(comparison.id, tab) {
+                    ComparisonCard(deleteComparison, comparison)
+                }
             }
         }
     }
@@ -94,7 +96,6 @@ private fun ReviewList(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ComparisonCard(
-    tab: AnimalTab,
     deleteComparison: (Int) -> Unit,
     comparison: AnimalComparison,
 ) {
@@ -102,7 +103,7 @@ fun ComparisonCard(
     // be unique to the different tabs, however in practice this doesn't seem to track, whether it
     // is a bug or misunderstanding of the documentation I do not know yet, but it is worth
     // investigating down the line
-    val (expanded, updateExpanded) = rememberSaveable(tab) { mutableStateOf(false) }
+    val (expanded, updateExpanded) = rememberSaveable { mutableStateOf(false) }
 
     // We need to store the large image size so that when the view recomposes and the image hasn't
     // loaded yet it will not have to resize the view, which would normally lead to views jumping
