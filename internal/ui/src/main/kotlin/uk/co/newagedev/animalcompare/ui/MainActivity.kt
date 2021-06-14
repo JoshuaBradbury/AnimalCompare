@@ -5,8 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -23,10 +21,10 @@ import coil.imageLoader
 import com.google.accompanist.coil.LocalImageLoader
 import dagger.hilt.android.AndroidEntryPoint
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
-import uk.co.newagedev.animalcompare.ui.screens.review.ReviewScreen
 import uk.co.newagedev.animalcompare.ui.screens.Screen
-import uk.co.newagedev.animalcompare.ui.screens.swipe.SwipeScreen
 import uk.co.newagedev.animalcompare.ui.screens.favourites.FavouritesScreen
+import uk.co.newagedev.animalcompare.ui.screens.review.ReviewScreen
+import uk.co.newagedev.animalcompare.ui.screens.swipe.SwipeScreen
 import uk.co.newagedev.animalcompare.ui.theme.AnimalCompareTheme
 
 @AndroidEntryPoint
@@ -58,7 +56,7 @@ fun MainScreen() {
                     BottomNavigationItem(
                         icon = {
                             Icon(
-                                Icons.Filled.Favorite,
+                                screen.getIcon(),
                                 contentDescription = stringResource(screen.title)
                             )
                         },
