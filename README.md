@@ -35,7 +35,9 @@ Testing is one of my weaker areas for sure, but the advantage of the new modern 
 
 ## Future improvements
 
-- Potentially add more colour, and also add the number of votes each animal has, maybe with more title content.
+- Add a proper release variant also missed due to not being necessary
+- Add analytics, they were missed out for now as they felt outside the scope of the app
+- Potentially add more colour, and also add the number of votes each animal has, maybe with more title content
 - Restructure some of the navigation, to support future animals
 - Simplify the animal definitions to a single type, although this poses different issues in terms of what part of the app needs what information, it is generally better to not provide too much info so this is a preference one I think
 - Show the loser of each swipe
