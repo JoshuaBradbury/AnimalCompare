@@ -1,15 +1,21 @@
 package uk.co.newagedev.animalcompare.ui.screens.swipe
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -19,11 +25,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import uk.co.newagedev.animalcompare.domain.model.AnimalType
 import uk.co.newagedev.animalcompare.ui.R
+import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.absoluteValue
+import kotlin.math.sin
 
 private const val SWIPES_ARROW_VISIBLE = 10
+private const val SWIPE_TIMEOUT = 7500L // ms
 
 @Composable
 fun SwipeOptions(
@@ -107,13 +118,35 @@ fun SwipeableCard(
         }
 
         if (shouldShowArrow) {
+            val arrowAnimation = remember { Animatable(0f) }
+
+            // If the offset hasn't changed in SWIPE_TIMEOUT ms then we should animate the
+            // arrows to show they can be moved. We show the animation initially after 1 second, so
+            // that the user knows immediately what they can do, and the rest of the iterations are
+            // a reminder
+            LaunchedEffect(offset) {
+                delay(1000L)
+
+                while (true) {
+                    arrowAnimation.animateTo(
+                        1.5f,
+                        tween(durationMillis = 3000, easing = LinearEasing)
+                    )
+                    delay(SWIPE_TIMEOUT)
+                    arrowAnimation.snapTo(0f)
+                }
+            }
+
+            val animationOffset = maxWidth * abs(sin(arrowAnimation.value * 2f * PI.toFloat())) * 0.05f
+
             // Arrow showing which way to swipe
             Image(
                 painter = painterResource(R.drawable.ic_arrow),
                 contentDescription = stringResource(R.string.swipe_arrow_desc),
                 modifier = Modifier
                     .fillMaxWidth(0.2f)
-                    .offset(maxWidth * 0.7f * leftAlignedAdjustment)
+                    .scale(1f + (animationOffset.value / maxWidth.value))
+                    .offset((maxWidth * 0.7f + animationOffset) * leftAlignedAdjustment)
                     .rotate(leftAlignedAdjustment.coerceAtMost(0f) * 180f)
                     .alpha(1f - (offset.absoluteValue * 5f)),
                 colorFilter = ColorFilter.tint(MaterialTheme.colors.onSurface),

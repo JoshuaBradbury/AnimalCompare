@@ -9,6 +9,7 @@
     <string name="review_chose_on">Swiped on %1$s at %2$s</string>
     <string name="review_delete_swipe">Delete swipe</string>
     <string name="review_expand_desc">Expand animal swipe</string>
+    <string name="review_not_enough_swipes">There are no swipes recorded that match this category, check again later when you have!</string>
 
     <!-- Swipe screen -->
     <string name="swipe_which_animal">Which %1$s do you prefer?</string>
