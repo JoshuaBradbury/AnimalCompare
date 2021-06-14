@@ -2,22 +2,16 @@
 
 This is a relatively simple app on the surface, that allows users to swipe through pictures of dogs, cats and foxes, and effectively find their favourites. The pictures are put up side by side and the user has to swipe to choose an animal. They also have an option to review their past swipes and delete any they made by accident, or no longer agree with. On top of this they can see their ranked photos and have it broken down by specific animal.
 
-The purpose of the app is more so to demonstrate a strong cohesion of the different architecture components, as well as the new Jetpack Compose. The app was designed from the ground up to utilise the features these libraries provide. Room was used as the main source of truth in the app, storing all the different animals, swipes. Some complex queries were utilised, as well as a demonstration of how effectively objects can be pulled from it and used, making development a lot cleaner and overall more effective.
+The purpose of the app is more so to demonstrate a strong cohesion of the different architecture components, as well as the new Jetpack Compose. The app was designed from the ground up to utilise the features these libraries provide. It also has a dark and a light theme, however I personally prefer dark themes! Room was used as the main source of truth in the app, storing all the different animals, swipes. Some complex queries were utilised, as well as a demonstration of how effectively objects can be pulled from it and used, making development a lot cleaner and overall more effective.
 
 Retrofit was also utilised, alongside kotlinx serialization, this proved very effective to cleanly work with the json data returned by the different APIs used within. A full list of the libraries used are listed at the bottom.
 
 ## Screenshots
 
-![](resources/cat_swipe.png)
+<img src="resources/cat_swipe.jpg" width="400px" /> <img src="resources/dog_swipe.jpg" width="400px" />
 
 
-![](resources/dog_swipe.png)
-
-
-![](resources/review.png)
-
-
-![](resources/favourites.png)
+<img src="resources/review.jpg" width="400px" /> <img src="resources/favourites.jpg" width="400px" />
 
 ## Post-mortem
 
