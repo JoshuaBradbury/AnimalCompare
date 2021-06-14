@@ -5,7 +5,7 @@ import uk.co.newagedev.animalcompare.domain.model.AnimalType
 
 object FakeAnimal {
 
-    private val dogs = listOf(
+    val dogs = listOf(
         Animal(
             1,
             "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/dog-puppy-on-garden-royalty-free-image-1586966191.jpg",
@@ -17,12 +17,4 @@ object FakeAnimal {
             AnimalType.Dog,
         ),
     )
-
-    fun getFakeAnimal(animalType: AnimalType): Animal {
-        return when (animalType) {
-            is AnimalType.Dog -> {
-                dogs.random()
-            }
-        }
-    }
 }

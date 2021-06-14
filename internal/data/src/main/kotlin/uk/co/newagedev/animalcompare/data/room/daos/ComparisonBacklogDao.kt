@@ -1,4 +1,4 @@
-package uk.co.newagedev.animalcompare.domain.room.daos
+package uk.co.newagedev.animalcompare.data.room.daos
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
@@ -10,8 +10,20 @@ import uk.co.newagedev.animalcompare.domain.room.relations.AnimalInBacklog
 interface ComparisonBacklogDao {
 
     @Transaction
-    @Query("SELECT * FROM to_compare LEFT OUTER JOIN animals ON to_compare.animal = animals.id WHERE type = :animalType ORDER BY animals.id")
+    @Query(
+        """
+        SELECT to_compare.id, 
+        to_compare.animal
+        FROM to_compare
+        LEFT OUTER JOIN animals ON to_compare.animal = animals.id
+         WHERE type = :animalType
+        ORDER BY to_compare.id
+    """
+    )
     fun getBacklog(animalType: AnimalType): Flow<List<AnimalInBacklog>>
+
+    @Query("SELECT * FROM to_compare")
+    suspend fun getCurrentBacklog(): List<ComparisonBacklog>
 
     @Insert
     suspend fun addToBacklog(comparisonBacklog: List<ComparisonBacklog>)

@@ -4,6 +4,7 @@ plugins {
     id 'kotlinx-serialization'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'kotlin-parcelize'
 }
 
 dependencies {
@@ -19,7 +20,6 @@ dependencies {
 
     // ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle"
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle"
 
@@ -49,6 +49,14 @@ dependencies {
 
     implementation "androidx.navigation:navigation-compose:2.4.0-alpha02"
     implementation "androidx.hilt:hilt-navigation-compose:$hiltNavigationCompose"
+
+    // Paging
+    implementation "androidx.paging:paging-runtime-ktx:$paging"
+    implementation "androidx.paging:paging-compose:$pagingCompose"
+
+    // Pager
+    implementation "com.google.accompanist:accompanist-pager:$pager"
+    implementation "com.google.accompanist:accompanist-pager-indicators:$pager"
 
     // Navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$navigation"

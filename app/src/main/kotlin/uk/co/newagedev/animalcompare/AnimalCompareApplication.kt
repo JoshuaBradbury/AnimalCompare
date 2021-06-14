@@ -3,13 +3,18 @@ package uk.co.newagedev.animalcompare
 import android.app.Application
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import coil.request.CachePolicy
+import coil.util.CoilUtils
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 @HiltAndroidApp
-class AnimalCompareApplication @Inject constructor() : Application() {
+class AnimalCompareApplication @Inject constructor() : Application(), ImageLoaderFactory {
 
     val applicationScope = CoroutineScope(SupervisorJob())
 
@@ -33,5 +38,18 @@ class AnimalCompareApplication @Inject constructor() : Application() {
                     .build()
             )
         }
+    }
+
+    override fun newImageLoader(): ImageLoader {
+        return ImageLoader
+            .Builder(this)
+            .crossfade(true)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .okHttpClient {
+                OkHttpClient.Builder()
+                    .cache(CoilUtils.createDefaultCache(this))
+                    .build()
+            }
+            .build()
     }
 }
