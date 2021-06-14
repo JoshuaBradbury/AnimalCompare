@@ -5,10 +5,17 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.pagerTabIndicatorOffset
+import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import uk.co.newagedev.animalcompare.domain.model.AnimalFilter
 import uk.co.newagedev.animalcompare.ui.R
@@ -47,23 +54,31 @@ sealed class AnimalTab(@StringRes val name: Int) : Parcelable {
     }
 }
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun AnimalTabs(
-    currentTab: AnimalTab,
-    updateCurrentTab: (AnimalTab) -> Unit,
     tabs: List<AnimalTab>,
     tabView: @Composable (AnimalTab) -> Unit,
 ) {
-    val selectedTabIndex = tabs.indexOfFirst { it == currentTab }
+    val pagerState = rememberPagerState(pageCount = tabs.size)
+    val coroutineScope = rememberCoroutineScope()
+
     Column {
         TabRow(
-            selectedTabIndex = selectedTabIndex,
+            selectedTabIndex = pagerState.currentPage,
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
+                )
+            }
         ) {
             tabs.forEachIndexed { index, animalTab ->
                 Tab(
-                    selected = selectedTabIndex == index,
+                    selected = pagerState.currentPage == index,
                     onClick = {
-                        updateCurrentTab(animalTab)
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
                     },
                     modifier = Modifier
                         .heightIn(min = 48.dp)
@@ -78,15 +93,17 @@ fun AnimalTabs(
                 }
             }
         }
+
         Divider(
             color = MaterialTheme.colors.onSurface.copy(alpha = 0.1f)
         )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            key(currentTab) {
-                tabView(currentTab)
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize(),
+        ) { page ->
+            key(page) {
+                tabView(tabs[page])
             }
         }
     }

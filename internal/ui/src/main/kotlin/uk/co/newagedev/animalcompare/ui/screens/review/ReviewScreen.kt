@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -20,17 +19,14 @@ import uk.co.newagedev.animalcompare.ui.utils.items
 
 @Composable
 fun ReviewScreen(viewModel: ReviewViewModel = hiltViewModel()) {
-    val (currentTab, updateCurrentTab) = rememberSaveable { mutableStateOf<AnimalTab>(AnimalTab.All) }
-
-    val lazyComparisons = viewModel.getComparisons(currentTab.toFilter()).collectAsLazyPagingItems()
     val coroutineScope = rememberCoroutineScope()
 
     // Custom animal tabs composable to cleanup the root review screen composable
     AnimalTabs(
-        currentTab = currentTab,
-        updateCurrentTab = updateCurrentTab,
         tabs = AnimalTab.values,
     ) {
+        val lazyComparisons = viewModel.getComparisons(it.toFilter()).collectAsLazyPagingItems()
+
         ReviewList(it, {
             coroutineScope.launch {
                 viewModel.deleteComparison(it)

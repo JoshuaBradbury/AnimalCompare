@@ -27,16 +27,12 @@ private const val FAVOURITE_THRESHOLD = 1
 
 @Composable
 fun FavouritesScreen(viewModel: FavouritesViewModel = hiltViewModel()) {
-    val (currentTab, updateCurrentTab) = rememberSaveable { mutableStateOf<AnimalTab>(AnimalTab.All) }
-
-    val favourites = viewModel.getFavourites(currentTab.toFilter()).collectAsState(null)
-
     // Custom animal tabs composable to cleanup the root favourites screen composable
     AnimalTabs(
-        currentTab = currentTab,
-        updateCurrentTab = updateCurrentTab,
         tabs = AnimalTab.values,
     ) {
+        val favourites = viewModel.getFavourites(it.toFilter()).collectAsState(null)
+
         // If we haven't finished loading any favourites yet, we should show a progress indicator
         // rather than the not enough swipes screen, in case the user has swiped enough
         if (favourites.value == null) {
