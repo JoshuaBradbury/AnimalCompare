@@ -6,6 +6,10 @@ The purpose of the app is more so to demonstrate a strong cohesion of the differ
 
 Retrofit was also utilised, alongside kotlinx serialization, this proved very effective to cleanly work with the json data returned by the different APIs used within. A full list of the libraries used are listed at the bottom.
 
+## How to run the app
+
+Download the latest Arctic Fox version, Beta 3 at the time of writing this, of android studio. I have provided an APK but I cannot guarantee that will work as well as building it directly.
+
 ## Screenshots
 
 <img src="resources/cat_swipe.jpg" width="400px" /> <img src="resources/dog_swipe.jpg" width="400px" />
@@ -27,7 +31,7 @@ The main issue the app has is the inconsistent image size. Working with 3 differ
 
 ## Testing
 
-TODO
+Testing is one of my weaker areas for sure, but the advantage of the new modern architecture components is that they all have their own way of being tested. I have only done Dao testing with the Room database as I am still researching effective testing in compose etc and how to properly access the necessary properties to cleanly test, without reflection etc.
 
 ## Future improvements
 
