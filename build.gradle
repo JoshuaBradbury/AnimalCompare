@@ -30,7 +30,10 @@ buildscript {
 
         // Coil
         coil = '1.2.2'
+
+        // Accompanist
         coilCompose = '0.11.1'
+        pager = '0.11.1'
 
         // Dependency Injection
         dagger = '2.36'

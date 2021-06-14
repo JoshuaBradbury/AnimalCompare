@@ -55,6 +55,10 @@ dependencies {
     implementation "androidx.paging:paging-runtime-ktx:$paging"
     implementation "androidx.paging:paging-compose:$pagingCompose"
 
+    // Pager
+    implementation "com.google.accompanist:accompanist-pager:$pager"
+    implementation "com.google.accompanist:accompanist-pager-indicators:$pager"
+
     // Navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$navigation"
     implementation "androidx.navigation:navigation-ui-ktx:$navigation"
