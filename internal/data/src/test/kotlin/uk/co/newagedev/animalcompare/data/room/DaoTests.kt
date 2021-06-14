@@ -1,5 +1,6 @@
 package uk.co.newagedev.animalcompare.data.room
 
+import android.os.Build.VERSION_CODES.Q
 import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -12,7 +13,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import org.robolectric.shadows.ShadowBuild.Q
 import uk.co.newagedev.animalcompare.data.CoroutineTestRule
 import uk.co.newagedev.animalcompare.data.room.daos.AnimalDao
 import uk.co.newagedev.animalcompare.data.room.daos.ComparisonBacklogDao
