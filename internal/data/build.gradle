@@ -42,6 +42,10 @@ dependencies {
     implementation "io.coil-kt:coil:$coil"
 
     testImplementation "junit:junit:$junit"
+    testImplementation "org.mockito:mockito-inline:$mockito"
+    testImplementation "org.amshove.kluent:kluent-android:$kluent"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines"
+    testImplementation "androidx.test:runner:$testRunner"
+    testImplementation "org.robolectric:robolectric:$roboElectric"
     androidTestImplementation "androidx.test.ext:junit:$junitExt"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoCore"
 }

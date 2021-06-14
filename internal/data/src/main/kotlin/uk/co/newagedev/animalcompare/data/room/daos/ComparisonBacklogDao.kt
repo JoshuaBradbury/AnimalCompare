@@ -23,7 +23,7 @@ interface ComparisonBacklogDao {
     fun getBacklog(animalType: AnimalType): Flow<List<AnimalInBacklog>>
 
     @Query("SELECT * FROM to_compare")
-    fun getCurrentBacklog(): List<ComparisonBacklog>
+    suspend fun getCurrentBacklog(): List<ComparisonBacklog>
 
     @Insert
     suspend fun addToBacklog(comparisonBacklog: List<ComparisonBacklog>)
